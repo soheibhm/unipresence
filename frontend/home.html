@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniPresence — Gestion des Présences par QR Code</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080712;
+      --bg2: #0e0c1a;
+      --card: #12101e;
+      --elevated: #191630;
+      --border: rgba(139,92,246,0.14);
+      --border-strong: rgba(139,92,246,0.34);
+      --p: #8b5cf6;
+      --pl: #a78bfa;
+      --pd: #6d28d9;
+      --pglow: rgba(139,92,246,0.25);
+      --ps: rgba(139,92,246,0.07);
+      --t: #f0eeff;
+      --ts: #a89ec4;
+      --tm: #5a5076;
+      --ok: #34d399;
+      --warn: #fbbf24;
+      --info: #38bdf8;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--t);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── NOISE TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ── GRID ── */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── AMBIENT ── */
+    .ambient {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .amb1 { width: 600px; height: 600px; background: radial-gradient(ellipse, rgba(109,40,217,.13), transparent 70%); top: -15%; left: -10%; }
+    .amb2 { width: 400px; height: 400px; background: radial-gradient(ellipse, rgba(56,189,248,.07), transparent 70%); top: 40%; right: -8%; }
+    .amb3 { width: 350px; height: 350px; background: radial-gradient(ellipse, rgba(52,211,153,.06), transparent 70%); bottom: 5%; left: 20%; }
+
+    /* ── NAVBAR ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(8,7,18,0.75);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      transition: background .3s;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--p), var(--pd));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; color: #fff;
+      box-shadow: 0 0 20px var(--pglow);
+    }
+    .nav-logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--t);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+    }
+    .nav-link {
+      color: var(--ts);
+      text-decoration: none;
+      font-size: .84rem;
+      font-weight: 500;
+      padding: .45rem .85rem;
+      border-radius: 8px;
+      transition: all .2s;
+    }
+    .nav-link:hover { color: var(--t); background: var(--ps); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--p), var(--pd));
+      color: #fff !important;
+      box-shadow: 0 3px 14px rgba(109,40,217,.35);
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(109,40,217,.5) !important; background: var(--ps) !important; color: #fff !important; }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 5% 80px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(139,92,246,.1);
+      border: 1px solid rgba(139,92,246,.28);
+      border-radius: 99px;
+      padding: .38rem 1rem;
+      font-size: .74rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      color: var(--pl);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--ok);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.6rem, 7vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      color: var(--t);
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s .1s ease both;
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, var(--pl), var(--p), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--ts);
+      max-width: 600px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      animation: fadeUp .6s .2s ease both;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp .6s .3s ease both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: .75rem 1.75rem;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--p), var(--pd));
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(109,40,217,.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(109,40,217,.55); }
+    .btn-outline {
+      background: transparent;
+      color: var(--ts);
+      border: 1px solid var(--border-strong);
+    }
+    .btn-outline:hover { background: var(--ps); color: var(--t); border-color: var(--p); }
+
+    /* Hero visual */
+    .hero-visual {
+      margin-top: 4rem;
+      position: relative;
+      width: 100%;
+      max-width: 860px;
+      animation: fadeUp .7s .4s ease both;
+    }
+    .hero-screen {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(139,92,246,.1);
+    }
+    .screen-bar {
+      background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+      padding: .8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .screen-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .sd1 { background: #f87171; }
+    .sd2 { background: #fbbf24; }
+    .sd3 { background: #34d399; }
+    .screen-url {
+      background: var(--bg2);
+      border-radius: 6px;
+      padding: .25rem .8rem;
+      font-size: .72rem;
+      color: var(--tm);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .screen-content {
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 1rem;
+      min-height: 300px;
+    }
+    .screen-sidebar {
+      background: var(--bg2);
+      border-radius: 12px;
+      padding: 1rem .75rem;
+    }
+    .ss-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 1.2rem;
+      padding: 0 .25rem;
+    }
+    .ss-icon {
+      width: 26px; height: 26px;
+      background: linear-gradient(135deg, var(--p), var(--pd));
+      border-radius: 7px;
+      font-size: .65rem;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ss-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .82rem; color: var(--t); }
+    .ss-item {
+      display: flex; align-items: center; gap: 7px;
+      padding: .4rem .6rem;
+      border-radius: 7px;
+      font-size: .74rem;
+      color: var(--ts);
+      margin-bottom: .2rem;
+    }
+    .ss-item.active { background: var(--ps); color: var(--pl); border: 1px solid var(--border); }
+    .ss-item i { font-size: .7rem; width: 12px; text-align: center; }
+    .screen-main { display: flex; flex-direction: column; gap: .8rem; }
+    .sm-row { display: grid; grid-template-columns: repeat(3,1fr); gap: .7rem; }
+    .sm-stat {
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .85rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .sm-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--p), var(--pd)); }
+    .sm-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em; color: var(--tm); margin-bottom: .3rem; font-weight: 600; }
+    .sm-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--t); }
+    .sm-sub { font-size: .65rem; color: var(--tm); margin-top: .15rem; }
+    .sm-table {
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .sm-th {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      background: var(--bg2);
+      padding: .5rem .8rem;
+      font-size: .6rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--tm);
+      font-weight: 600;
+    }
+    .sm-row2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      padding: .45rem .8rem;
+      font-size: .68rem;
+      color: var(--ts);
+      border-top: 1px solid rgba(139,92,246,.06);
+    }
+    .badge-ok { background: rgba(52,211,153,.15); color: #6ee7b7; border-radius: 5px; padding: 1px 7px; font-size: .6rem; font-weight: 600; }
+    .badge-warn { background: rgba(251,191,36,.15); color: #fde68a; border-radius: 5px; padding: 1px 7px; font-size: .6rem; font-weight: 600; }
+    .badge-err { background: rgba(248,113,113,.15); color: #fca5a5; border-radius: 5px; padding: 1px 7px; font-size: .6rem; font-weight: 600; }
+
+    /* QR floating card */
+    .qr-float {
+      position: absolute;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,.5);
+      animation: float 4s ease-in-out infinite;
+      z-index: 2;
+    }
+    @keyframes float { 0%,100%{transform:translateY(-50%) translateY(0)} 50%{transform:translateY(-50%) translateY(-12px)} }
+    .qr-box {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, rgba(139,92,246,.08), rgba(109,40,217,.12));
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: .7rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(7,1fr);
+      gap: 2px;
+      padding: 6px;
+    }
+    .qr-cell {
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 1px;
+    }
+    .qr-cell.on { background: var(--p); }
+    .qr-cell.off { background: transparent; }
+    .qr-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .72rem; color: var(--t); text-align: center; margin-bottom: .25rem; }
+    .qr-timer { font-size: .65rem; color: var(--ok); text-align: center; }
+
+    /* Stats floating */
+    .stat-float {
+      position: absolute;
+      left: -70px;
+      bottom: 15%;
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,.4);
+      animation: float 5s 1s ease-in-out infinite;
+      z-index: 2;
+    }
+    .sf-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.6rem; color: var(--ok); }
+    .sf-label { font-size: .7rem; color: var(--ts); }
+    .sf-bar { height: 3px; background: var(--elevated); border-radius: 2px; margin-top: .5rem; }
+    .sf-fill { height: 100%; width: 87%; background: linear-gradient(90deg, var(--ok), #10b981); border-radius: 2px; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 120px 5%;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .section-chip {
+      display: inline-block;
+      background: var(--ps);
+      border: 1px solid var(--border-strong);
+      border-radius: 99px;
+      padding: .3rem .9rem;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--pl);
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      letter-spacing: -.025em;
+      color: var(--t);
+      margin-bottom: .75rem;
+    }
+    .section-sub {
+      font-size: 1rem;
+      color: var(--ts);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.75rem;
+      transition: border-color .25s, transform .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feat-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-4px);
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(139,92,246,.06), transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .feat-card:hover::before { opacity: 1; }
+    .feat-icon {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 1.2rem;
+    }
+    .fi-purple { background: rgba(139,92,246,.15); color: var(--pl); }
+    .fi-blue { background: rgba(56,189,248,.15); color: #7dd3fc; }
+    .fi-green { background: rgba(52,211,153,.15); color: #6ee7b7; }
+    .fi-yellow { background: rgba(251,191,36,.15); color: #fde68a; }
+    .fi-pink { background: rgba(244,114,182,.15); color: #f9a8d4; }
+    .fi-orange { background: rgba(251,146,60,.15); color: #fdba74; }
+    .feat-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--t);
+      margin-bottom: .5rem;
+    }
+    .feat-desc { font-size: .85rem; color: var(--ts); line-height: 1.65; }
+
+    /* ── ROLES ── */
+    .roles { padding: 80px 5% 120px; }
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+    .role-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: border-color .25s, transform .25s;
+    }
+    .role-card:hover { border-color: var(--border-strong); transform: translateY(-4px); }
+    .role-header {
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .rh-student { background: linear-gradient(135deg, rgba(52,211,153,.1), rgba(52,211,153,.03)); }
+    .rh-professor { background: linear-gradient(135deg, rgba(56,189,248,.1), rgba(56,189,248,.03)); }
+    .rh-admin { background: linear-gradient(135deg, rgba(139,92,246,.12), rgba(139,92,246,.03)); }
+    .role-icon {
+      font-size: 2.2rem;
+      margin-bottom: .75rem;
+    }
+    .role-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--t);
+      margin-bottom: .4rem;
+    }
+    .role-tag {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: .2rem .7rem;
+      border-radius: 99px;
+    }
+    .rt-student { background: rgba(52,211,153,.15); color: #6ee7b7; }
+    .rt-professor { background: rgba(56,189,248,.15); color: #7dd3fc; }
+    .rt-admin { background: rgba(139,92,246,.15); color: var(--pl); }
+    .role-body { padding: 1.5rem 2rem 2rem; }
+    .role-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .84rem;
+      color: var(--ts);
+      padding: .5rem 0;
+      border-bottom: 1px solid rgba(139,92,246,.06);
+    }
+    .role-feature:last-child { border-bottom: none; }
+    .role-feature i { color: var(--p); font-size: .7rem; margin-top: .22rem; flex-shrink: 0; }
+    .role-btn-wrap { padding: 0 2rem 2rem; }
+
+    /* ── STATS ── */
+    .stats-section {
+      padding: 80px 5%;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--t), var(--pl));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: .5rem;
+    }
+    .stat-lbl { font-size: .84rem; color: var(--ts); }
+    .stat-ico { font-size: 1.5rem; margin-bottom: .75rem; color: var(--p); opacity: .7; }
+
+    /* ── HOW IT WORKS ── */
+    .how { padding: 120px 5%; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 28px; left: calc(12.5% + 20px); right: calc(12.5% + 20px);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+    }
+    .step {
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+    .step-num {
+      width: 56px; height: 56px;
+      background: var(--card);
+      border: 2px solid var(--border-strong);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--pl);
+      position: relative;
+      z-index: 1;
+    }
+    .step-num.active {
+      background: linear-gradient(135deg, var(--p), var(--pd));
+      color: #fff;
+      border-color: var(--p);
+      box-shadow: 0 0 25px var(--pglow);
+    }
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--t);
+      margin-bottom: .5rem;
+    }
+    .step-desc { font-size: .82rem; color: var(--ts); line-height: 1.6; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 120px 5%;
+      text-align: center;
+    }
+    .cta-box {
+      background: linear-gradient(135deg, rgba(139,92,246,.1), rgba(109,40,217,.06));
+      border: 1px solid var(--border-strong);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: 50%;
+      transform: translateX(-50%);
+      width: 400px; height: 400px;
+      background: radial-gradient(ellipse, rgba(139,92,246,.12), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      letter-spacing: -.025em;
+      color: var(--t);
+      margin-bottom: 1rem;
+    }
+    .cta-sub { font-size: 1rem; color: var(--ts); margin-bottom: 2rem; max-width: 450px; margin-left: auto; margin-right: auto; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 3rem 5% 2rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(3,1fr);
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-brand p { font-size: .84rem; color: var(--ts); margin-top: .75rem; line-height: 1.6; }
+    .footer-col-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .82rem;
+      color: var(--t);
+      margin-bottom: 1rem;
+    }
+    .footer-link {
+      display: block;
+      font-size: .82rem;
+      color: var(--ts);
+      text-decoration: none;
+      margin-bottom: .5rem;
+      transition: color .2s;
+    }
+    .footer-link:hover { color: var(--pl); }
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .78rem;
+      color: var(--tm);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .roles-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .steps { grid-template-columns: repeat(2,1fr); }
+      .steps::before { display: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .screen-content { grid-template-columns: 1fr; }
+      .screen-sidebar { display: none; }
+      .qr-float, .stat-float { display: none; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .hero { padding: 100px 1.5rem 60px; }
+      .features-grid, .steps { grid-template-columns: 1fr; }
+      .stats-grid, .footer-grid { grid-template-columns: 1fr; }
+      .roles-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Backgrounds -->
+<div class="grid-bg"></div>
+<div class="ambient amb1"></div>
+<div class="ambient amb2"></div>
+<div class="ambient amb3"></div>
+
+<!-- ── NAVBAR ── -->
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon"><i class="fas fa-qrcode"></i></div>
+    <span class="nav-logo-text">UniPresence</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Fonctionnalités</a>
+    <a href="#roles" class="nav-link">Portails</a>
+    <a href="#how" class="nav-link">Comment ça marche</a>
+    <a href="login.html" class="nav-link nav-cta"><i class="fas fa-sign-in-alt"></i> Se connecter</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    Système de présence nouvelle génération
+  </div>
+
+  <h1 class="hero-title">
+    Gérez les présences<br>
+    <span>avec intelligence</span>
+  </h1>
+
+  <p class="hero-sub">
+    UniPresence révolutionne le suivi des présences universitaires grâce aux QR codes dynamiques, aux tableaux de bord en temps réel et à une gestion fluide des justifications.
+  </p>
+
+  <div class="hero-actions">
+    <a href="login.html" class="btn btn-primary">
+      <i class="fas fa-rocket"></i> Accéder à la plateforme
+    </a>
+    <a href="#how" class="btn btn-outline">
+      <i class="fas fa-play-circle"></i> Voir comment ça marche
+    </a>
+  </div>
+
+  <!-- Hero Visual -->
+  <div class="hero-visual">
+    <!-- QR Float -->
+    <div class="qr-float">
+      <div class="qr-box">
+        <div class="qr-grid" id="qr-grid"></div>
+      </div>
+      <div class="qr-label">QR Dynamique</div>
+      <div class="qr-timer" id="qr-timer">⏱ 14:32 restant</div>
+    </div>
+
+    <!-- Stat Float -->
+    <div class="stat-float">
+      <div class="sf-val">87%</div>
+      <div class="sf-label">Taux de présence</div>
+      <div class="sf-bar"><div class="sf-fill"></div></div>
+    </div>
+
+    <div class="hero-screen">
+      <div class="screen-bar">
+        <div class="screen-dot sd1"></div>
+        <div class="screen-dot sd2"></div>
+        <div class="screen-dot sd3"></div>
+        <div class="screen-url">app.unipresence.dz/dashboard</div>
+      </div>
+      <div class="screen-content">
+        <div class="screen-sidebar">
+          <div class="ss-logo">
+            <div class="ss-icon"><i class="fas fa-qrcode"></i></div>
+            <div class="ss-name">UniPresence</div>
+          </div>
+          <div class="ss-item active"><i class="fas fa-home"></i> Tableau de bord</div>
+          <div class="ss-item"><i class="fas fa-qrcode"></i> Scanner QR</div>
+          <div class="ss-item"><i class="fas fa-calendar"></i> Emploi du temps</div>
+          <div class="ss-item"><i class="fas fa-chart-bar"></i> Statistiques</div>
+          <div class="ss-item"><i class="fas fa-file-alt"></i> Justifications</div>
+          <div class="ss-item"><i class="fas fa-bell"></i> Notifications</div>
+        </div>
+        <div class="screen-main">
+          <div class="sm-row">
+            <div class="sm-stat">
+              <div class="sm-label">Présences</div>
+              <div class="sm-val">87%</div>
+              <div class="sm-sub">↑ +2% ce mois</div>
+            </div>
+            <div class="sm-stat">
+              <div class="sm-label">Absences</div>
+              <div class="sm-val">4</div>
+              <div class="sm-sub">2 justifiées</div>
+            </div>
+            <div class="sm-stat">
+              <div class="sm-label">Modules</div>
+              <div class="sm-val">6</div>
+              <div class="sm-sub">Semestre 5</div>
+            </div>
+          </div>
+          <div class="sm-table">
+            <div class="sm-th">
+              <span>Module</span>
+              <span>Taux</span>
+              <span>Statut</span>
+            </div>
+            <div class="sm-row2">
+              <span>Génie Logiciel</span>
+              <span>100%</span>
+              <span><span class="badge-ok">Excellent</span></span>
+            </div>
+            <div class="sm-row2">
+              <span>Base de données</span>
+              <span>92%</span>
+              <span><span class="badge-ok">Bien</span></span>
+            </div>
+            <div class="sm-row2">
+              <span>Algorithmique</span>
+              <span>80%</span>
+              <span><span class="badge-warn">Moyen</span></span>
+            </div>
+            <div class="sm-row2">
+              <span>Réseaux</span>
+              <span>75%</span>
+              <span><span class="badge-err">Insuffisant</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-ico"><i class="fas fa-user-graduate"></i></div>
+      <div class="stat-num">2 400+</div>
+      <div class="stat-lbl">Étudiants gérés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico"><i class="fas fa-chalkboard-teacher"></i></div>
+      <div class="stat-num">120</div>
+      <div class="stat-lbl">Enseignants actifs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico"><i class="fas fa-calendar-check"></i></div>
+      <div class="stat-num">15 000+</div>
+      <div class="stat-lbl">Séances enregistrées</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-ico"><i class="fas fa-chart-line"></i></div>
+      <div class="stat-num">89%</div>
+      <div class="stat-lbl">Taux de présence moyen</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features" id="features">
+  <div class="section-header">
+    <div class="section-chip">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+    <p class="section-sub">Une solution complète pensée pour les universités algériennes.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon fi-purple"><i class="fas fa-qrcode"></i></div>
+      <div class="feat-title">QR Codes Dynamiques</div>
+      <div class="feat-desc">Chaque séance génère un QR code unique avec une durée de validité configurable. Sécurisé, infalsifiable et expirant automatiquement.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon fi-blue"><i class="fas fa-chart-line"></i></div>
+      <div class="feat-title">Tableaux de Bord Temps Réel</div>
+      <div class="feat-desc">Statistiques de présence actualisées en permanence pour les étudiants, professeurs et administrateurs, avec alertes automatiques.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon fi-green"><i class="fas fa-file-upload"></i></div>
+      <div class="feat-title">Gestion des Justifications</div>
+      <div class="feat-desc">Les étudiants soumettent leurs justifications avec pièces jointes. Les professeurs valident ou refusent directement depuis leur espace.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon fi-yellow"><i class="fas fa-bell"></i></div>
+      <div class="feat-title">Notifications Intelligentes</div>
+      <div class="feat-desc">Alertes automatiques pour les absences répétées, les justifications traitées et les seuils critiques de présence.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon fi-pink"><i class="fas fa-file-export"></i></div>
+      <div class="feat-title">Rapports & Exports</div>
+      <div class="feat-desc">Génération de feuilles de présence, rapports par module ou par étudiant, exportables en PDF ou Excel.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon fi-orange"><i class="fas fa-shield-alt"></i></div>
+      <div class="feat-title">Sécurité Avancée</div>
+      <div class="feat-desc">Authentification JWT, mots de passe bcrypt, rôles et permissions granulaires. Chaque utilisateur accède uniquement à ses données.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROLES ── -->
+<section class="roles" id="roles">
+  <div class="section-header">
+    <div class="section-chip">Portails utilisateurs</div>
+    <h2 class="section-title">Trois espaces dédiés</h2>
+    <p class="section-sub">Une interface adaptée à chaque rôle, avec des outils pensés pour leur usage quotidien.</p>
+  </div>
+
+  <div class="roles-grid">
+    <!-- Étudiant -->
+    <div class="role-card">
+      <div class="role-header rh-student">
+        <div class="role-icon">👨‍🎓</div>
+        <div class="role-name">Étudiant</div>
+        <span class="role-tag rt-student">Portail Étudiant</span>
+      </div>
+      <div class="role-body">
+        <div class="role-feature"><i class="fas fa-check"></i>Scan QR pour valider sa présence</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Suivi de son taux de présence par module</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Soumission de justifications avec pièces jointes</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Emploi du temps et séances à venir</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Historique complet des présences/absences</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Notifications et alertes personnalisées</div>
+      </div>
+      <div class="role-btn-wrap">
+        <a href="login.html" class="btn btn-outline" style="width:100%;justify-content:center;">
+          <i class="fas fa-sign-in-alt"></i> Accéder
+        </a>
+      </div>
+    </div>
+
+    <!-- Professeur -->
+    <div class="role-card">
+      <div class="role-header rh-professor">
+        <div class="role-icon">👨‍🏫</div>
+        <div class="role-name">Professeur</div>
+        <span class="role-tag rt-professor">Portail Enseignant</span>
+      </div>
+      <div class="role-body">
+        <div class="role-feature"><i class="fas fa-check"></i>Génération de QR codes par séance</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Feuille de présence interactive en temps réel</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Traitement des justifications d'absence</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Statistiques de présence par groupe/module</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Planification des séances</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Export des feuilles de présence PDF</div>
+      </div>
+      <div class="role-btn-wrap">
+        <a href="login.html" class="btn btn-outline" style="width:100%;justify-content:center;">
+          <i class="fas fa-sign-in-alt"></i> Accéder
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin -->
+    <div class="role-card">
+      <div class="role-header rh-admin">
+        <div class="role-icon">👑</div>
+        <div class="role-name">Administrateur</div>
+        <span class="role-tag rt-admin">Portail Admin</span>
+      </div>
+      <div class="role-body">
+        <div class="role-feature"><i class="fas fa-check"></i>Gestion complète des utilisateurs</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Configuration des modules et groupes</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Tableau de bord analytique global</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Rapports de présence multi-niveaux</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Supervision des justifications</div>
+        <div class="role-feature"><i class="fas fa-check"></i>Gestion des années universitaires</div>
+      </div>
+      <div class="role-btn-wrap">
+        <a href="login.html" class="btn btn-primary" style="width:100%;justify-content:center;">
+          <i class="fas fa-user-shield"></i> Accéder (Admin)
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how" id="how">
+  <div class="section-header">
+    <div class="section-chip">Processus</div>
+    <h2 class="section-title">Comment ça marche ?</h2>
+    <p class="section-sub">Un processus simple en 4 étapes pour une présence validée en quelques secondes.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num active">1</div>
+      <div class="step-title">Le professeur démarre la séance</div>
+      <div class="step-desc">Il génère un QR code dynamique depuis son tableau de bord avec une durée de validité personnalisée.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">L'étudiant scanne le code</div>
+      <div class="step-desc">Via l'application ou le navigateur, l'étudiant scanne le QR code projeté en salle en quelques secondes.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">La présence est enregistrée</div>
+      <div class="step-desc">Le système valide automatiquement la présence et met à jour les statistiques en temps réel.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Le suivi est automatique</div>
+      <div class="step-desc">Les taux de présence, alertes et rapports sont générés automatiquement pour toutes les parties.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="cta-box">
+    <h2 class="cta-title">Prêt à moderniser<br>la gestion des présences ?</h2>
+    <p class="cta-sub">Connectez-vous et explorez toutes les fonctionnalités de la plateforme.</p>
+    <div class="cta-actions">
+      <a href="login.html" class="btn btn-primary" style="font-size:1rem;padding:.9rem 2.5rem;">
+        <i class="fas fa-rocket"></i> Essayer maintenant
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="text-decoration:none;margin-bottom:.75rem;display:flex;">
+        <div class="nav-logo-icon"><i class="fas fa-qrcode"></i></div>
+        <span class="nav-logo-text" style="margin-left:10px;">UniPresence</span>
+      </a>
+      <p>Système de gestion des présences universitaires par QR Code. Développé pour les établissements d'enseignement supérieur algériens.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <a href="#features" class="footer-link">Fonctionnalités</a>
+      <a href="#roles" class="footer-link">Portails</a>
+      <a href="#how" class="footer-link">Comment ça marche</a>
+    </div>
+    <div>
+      <div class="footer-col-title">Accès</div>
+      <a href="login.html" class="footer-link">Connexion Étudiant</a>
+      <a href="login.html" class="footer-link">Connexion Professeur</a>
+      <a href="login.html" class="footer-link">Connexion Admin</a>
+      <a href="login.html" class="footer-link">Créer un compte</a>
+    </div>
+    <div>
+      <div class="footer-col-title">Support</div>
+      <a href="#" class="footer-link">Aide & FAQ</a>
+      <a href="#" class="footer-link">Contact</a>
+      <a href="#" class="footer-link">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 UniPresence — Tous droits réservés</span>
+    <span>Construit avec <span style="color:var(--p);">♥</span> pour l'université algérienne</span>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Generate decorative QR pattern
+  function generateQRPattern() {
+    const grid = document.getElementById('qr-grid');
+    if (!grid) return;
+    const pattern = [
+      1,1,1,1,1,1,0,
+      1,0,0,0,0,1,0,
+      1,0,1,1,0,1,1,
+      1,0,1,1,0,1,0,
+      1,0,0,0,0,1,1,
+      1,1,1,1,1,1,0,
+      0,1,0,1,0,0,1,
+    ];
+    pattern.forEach(on => {
+      const cell = document.createElement('div');
+      cell.className = `qr-cell ${on ? 'on' : 'off'}`;
+      grid.appendChild(cell);
+    });
+  }
+  generateQRPattern();
+
+  // QR timer countdown
+  let seconds = 14 * 60 + 32;
+  setInterval(() => {
+    seconds = seconds > 0 ? seconds - 1 : 15 * 60;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    const el = document.getElementById('qr-timer');
+    if (el) el.textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} restant`;
+  }, 1000);
+
+  // Mouse parallax on feat cards
+  document.querySelectorAll('.feat-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--mx', x + '%');
+      card.style.setProperty('--my', y + '%');
+    });
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Animate stats on scroll
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.style.opacity = '1';
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.stat-card, .feat-card, .step, .role-card').forEach(el => {
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

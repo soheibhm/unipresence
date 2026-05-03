@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniPresence | Connexion</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0c0b14;--card:#13111f;--elevated:#1a1730;
+      --border:rgba(139,92,246,0.18);--border-strong:rgba(139,92,246,0.38);
+      --purple:#8b5cf6;--purple-light:#a78bfa;--purple-dim:#6d28d9;
+      --purple-glow:rgba(139,92,246,0.22);--purple-subtle:rgba(139,92,246,0.08);
+      --text:#f1eeff;--text-sec:#a89ec4;--text-muted:#5c5478;
+      --success:#34d399;--danger:#f87171;--warning:#fbbf24;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+         min-height:100vh;display:flex;align-items:center;justify-content:center;
+         overflow-x:hidden;overflow-y:auto;}
+    body::before{content:'';position:fixed;top:-30%;left:-15%;width:70%;height:70%;
+      background:radial-gradient(ellipse,rgba(109,40,217,.15) 0%,transparent 70%);pointer-events:none;}
+    body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:55%;height:55%;
+      background:radial-gradient(ellipse,rgba(139,92,246,.1) 0%,transparent 70%);pointer-events:none;}
+    .grid{position:fixed;inset:0;
+      background-image:linear-gradient(rgba(139,92,246,.03) 1px,transparent 1px),
+                       linear-gradient(90deg,rgba(139,92,246,.03) 1px,transparent 1px);
+      background-size:40px 40px;pointer-events:none;}
+    .orb{position:fixed;border-radius:50%;filter:blur(60px);pointer-events:none;animation:float 8s ease-in-out infinite;}
+    .orb1{width:300px;height:300px;background:rgba(109,40,217,.12);top:10%;left:5%;}
+    .orb2{width:200px;height:200px;background:rgba(139,92,246,.08);bottom:15%;right:10%;animation-delay:3s;}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+    .wrap{position:relative;z-index:1;width:100%;max-width:440px;padding:1.5rem;margin:auto;}
+    .logo-area{text-align:center;margin-bottom:2rem;}
+    .logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--purple),var(--purple-dim));
+      border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+      color:#fff;margin:0 auto 1rem;box-shadow:0 0 30px var(--purple-glow);}
+    .logo-title{font-weight:800;font-size:1.8rem;letter-spacing:-.02em;}
+    .logo-sub{font-size:.8rem;color:var(--text-muted);margin-top:.25rem;}
+    .auth-card{background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:2rem;box-shadow:0 8px 48px rgba(0,0,0,.4);}
+    .auth-tabs{display:flex;gap:.25rem;background:var(--elevated);border-radius:12px;
+      padding:.3rem;margin-bottom:1.75rem;}
+    .auth-tab{flex:1;padding:.5rem;border:none;background:none;color:var(--text-muted);
+      font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;border-radius:9px;
+      cursor:pointer;transition:all .2s;}
+    .auth-tab.active{background:linear-gradient(135deg,var(--purple),var(--purple-dim));
+      color:#fff;box-shadow:0 2px 12px rgba(109,40,217,.35);}
+    .auth-tab:hover:not(.active){color:var(--text-sec);}
+    .panel{display:none;}.panel.active{display:block;}
+    #panel-register{max-height:65vh;overflow-y:auto;padding-right:4px;}
+    #panel-register::-webkit-scrollbar{width:4px;}
+    #panel-register::-webkit-scrollbar-thumb{background:rgba(139,92,246,.35);border-radius:4px;}
+    label{font-size:.78rem;font-weight:500;color:var(--text-sec);margin-bottom:.35rem;display:block;}
+    .input-wrap{position:relative;margin-bottom:1.1rem;}
+    .input-wrap i.fi{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);
+      color:var(--text-muted);font-size:.78rem;pointer-events:none;}
+    input{width:100%;background:var(--elevated);border:1px solid var(--border);color:var(--text);
+      border-radius:10px;padding:.62rem .9rem .62rem 2.4rem;font-family:'Inter',sans-serif;
+      font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+    input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.15);}
+    input::placeholder{color:var(--text-muted);}
+    .eye-btn{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;
+      border:none;color:var(--text-muted);cursor:pointer;padding:0;font-size:.82rem;}
+    .role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:1.1rem;}
+    .role-btn{background:var(--elevated);border:1px solid var(--border);border-radius:10px;
+      padding:.7rem .4rem;text-align:center;cursor:pointer;transition:all .2s;}
+    .role-btn:hover{border-color:var(--border-strong);}
+    .role-btn.selected{border-color:var(--purple);background:var(--purple-subtle);
+      box-shadow:0 0 0 2px rgba(139,92,246,.15);}
+    .role-btn i{font-size:1.1rem;color:var(--text-muted);display:block;margin-bottom:.35rem;}
+    .role-btn.selected i{color:var(--purple);}
+    .role-btn span{font-size:.72rem;font-weight:500;color:var(--text-muted);}
+    .role-btn.selected span{color:var(--purple-light);}
+    .btn-auth{width:100%;padding:.7rem;background:linear-gradient(135deg,var(--purple),var(--purple-dim));
+      color:#fff;border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:.9rem;
+      font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(109,40,217,.38);
+      transition:all .2s;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-auth:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 24px rgba(109,40,217,.5);}
+    .btn-auth:disabled{opacity:.6;cursor:not-allowed;}
+    .btn-secondary{background:transparent !important;border:1px solid var(--border) !important;
+      color:var(--text-sec) !important;box-shadow:none !important;}
+    .btn-secondary:hover:not(:disabled){background:var(--elevated) !important;transform:none !important;}
+    .forgot{font-size:.78rem;color:var(--purple-light);text-align:right;cursor:pointer;background:none;
+      border:none;padding:0;margin-bottom:.4rem;display:block;width:fit-content;margin-left:auto;}
+    .forgot:hover{color:var(--text);}
+    .msg{border-radius:9px;padding:.65rem .9rem;font-size:.82rem;margin-bottom:1rem;display:none;line-height:1.5;}
+    .msg.err{background:rgba(248,113,113,.1);color:#fca5a5;border-left:3px solid var(--danger);}
+    .msg.ok{background:rgba(52,211,153,.1);color:#6ee7b7;border-left:3px solid var(--success);}
+    .msg.warn{background:rgba(251,191,36,.1);color:#fde68a;border-left:3px solid var(--warning);}
+    .msg.show{display:block;}
+    select{width:100%;background:var(--elevated);border:1px solid var(--border);color:var(--text);
+      border-radius:10px;padding:.62rem .9rem;font-family:'Inter',sans-serif;font-size:.875rem;
+      outline:none;margin-bottom:1.1rem;}
+    select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(139,92,246,.15);}
+    select option{background:var(--elevated);}
+    .resend-btn{color:var(--purple-light);cursor:pointer;background:none;border:none;
+      padding:0;font-size:.82rem;text-decoration:underline;font-family:'Inter',sans-serif;}
+  </style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="wrap">
+  <div class="logo-area">
+    <div class="logo-icon"><i class="fas fa-qrcode"></i></div>
+    <div class="logo-title">UniPresence</div>
+    <div class="logo-sub">Système de gestion des présences par QR Code</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login',this)">Connexion</button>
+      <button class="auth-tab" onclick="switchTab('register',this)">Inscription</button>
+      <button class="auth-tab" onclick="switchTab('forgot',this)">Mot de passe</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="panel active" id="panel-login">
+      <div class="msg err" id="login-err"></div>
+      <div class="msg warn" id="login-warn"></div>
+      <label>Email</label>
+      <div class="input-wrap">
+        <i class="fi fas fa-envelope"></i>
+        <input type="text" id="login-email" placeholder="votre@email.dz" autocomplete="off">
+      </div>
+      <label>Mot de passe</label>
+      <div class="input-wrap">
+        <i class="fi fas fa-lock"></i>
+        <input type="password" id="login-pass" placeholder="••••••••">
+        <button class="eye-btn" onclick="togglePass('login-pass',this)"><i class="fas fa-eye"></i></button>
+      </div>
+      <button class="forgot" onclick="switchTab('forgot', document.querySelectorAll('.auth-tab')[2])">
+        Mot de passe oublié ?
+      </button>
+      <button class="btn-auth" id="login-btn" onclick="doLogin()">
+        <i class="fas fa-sign-in-alt"></i> Se connecter
+      </button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="panel" id="panel-register">
+      <div class="msg err" id="reg-err"></div>
+      <div class="msg ok" id="reg-ok"></div>
+      <label>Je suis :</label>
+      <div class="role-grid">
+        <div class="role-btn selected" onclick="selectRole('professeur',this)">
+          <i class="fas fa-chalkboard-teacher"></i><span>Professeur</span>
+        </div>
+        <div class="role-btn" onclick="selectRole('etudiant',this)">
+          <i class="fas fa-user-graduate"></i><span>Étudiant</span>
+        </div>
+      </div>
+      <input type="hidden" id="reg-role" value="professeur">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.1rem;">
+        <div>
+          <label>Nom</label>
+          <input type="text" placeholder="Nom" id="reg-nom" style="padding-left:.9rem;">
+        </div>
+        <div>
+          <label>Prénom</label>
+          <input type="text" placeholder="Prénom" id="reg-prenom" style="padding-left:.9rem;">
+        </div>
+      </div>
+      <label>Email universitaire</label>
+      <div class="input-wrap">
+        <i class="fi fas fa-envelope"></i>
+        <input type="email" placeholder="email@univ.dz" id="reg-email">
+      </div>
+      <div id="student-fields" style="display:none;">
+        <label>N° Matricule</label>
+        <div class="input-wrap">
+          <i class="fi fas fa-id-card"></i>
+          <input type="text" placeholder="ex: 2022001" id="reg-matricule">
+        </div>
+        <label>Niveau</label>
+        <select id="reg-niveau">
+          <option value="">-- Choisir niveau --</option>
+          <option value="1">L1</option><option value="2">L2</option>
+          <option value="3">L3</option><option value="4">M1</option><option value="5">M2</option>
+        </select>
+      </div>
+      <label>Mot de passe</label>
+      <div class="input-wrap">
+        <i class="fi fas fa-lock"></i>
+        <input type="password" placeholder="Min. 8 caractères" id="reg-pass">
+        <button class="eye-btn" onclick="togglePass('reg-pass',this)"><i class="fas fa-eye"></i></button>
+      </div>
+      <label>Confirmer mot de passe</label>
+      <div class="input-wrap">
+        <i class="fi fas fa-lock"></i>
+        <input type="password" placeholder="Confirmer" id="reg-confirm">
+        <button class="eye-btn" onclick="togglePass('reg-confirm',this)"><i class="fas fa-eye"></i></button>
+      </div>
+      <button class="btn-auth" id="reg-btn" onclick="doRegister()">
+        <i class="fas fa-user-plus"></i> Créer mon compte
+      </button>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="panel" id="panel-forgot">
+      <div class="msg ok show" id="forgot-ok" style="display:none !important;"></div>
+      <div class="msg err" id="forgot-err"></div>
+      <p style="font-size:.83rem;color:var(--text-sec);margin-bottom:1.2rem;line-height:1.6;">
+        Entrez votre adresse email pour recevoir un lien de réinitialisation de mot de passe (valide 1 heure).
+      </p>
+      <label>Adresse email</label>
+      <div class="input-wrap">
+        <i class="fi fas fa-envelope"></i>
+        <input type="email" id="forgot-email" placeholder="votre@email.dz">
+      </div>
+      <button class="btn-auth" id="forgot-btn" onclick="doForgot()">
+        <i class="fas fa-paper-plane"></i> Envoyer le lien
+      </button>
+      <button class="btn-auth btn-secondary" style="margin-top:.5rem;"
+        onclick="switchTab('login',document.querySelectorAll('.auth-tab')[0])">
+        <i class="fas fa-arrow-left"></i> Retour
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const existingUser = (() => { try { return JSON.parse(localStorage.getItem('up_user')); } catch { return null; } })();
+  if (existingUser && localStorage.getItem('up_token')) redirectByRole(existingUser.role);
+
+  function redirectByRole(role) {
+    if (role === 'admin') window.location.href = '/admin.html';
+    else if (role === 'professeur') window.location.href = '/professor.html';
+    else window.location.href = '/student.html';
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  function selectRole(role, el) {
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('reg-role').value = role;
+    document.getElementById('student-fields').style.display = role === 'etudiant' ? 'block' : 'none';
+  }
+
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    const isPass = inp.type === 'password';
+    inp.type = isPass ? 'text' : 'password';
+    btn.innerHTML = `<i class="fas fa-eye${isPass ? '-slash' : ''}"></i>`;
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-pass').value;
+    const err   = document.getElementById('login-err');
+    const warn  = document.getElementById('login-warn');
+    const btn   = document.getElementById('login-btn');
+    err.classList.remove('show'); warn.classList.remove('show');
+
+    if (!email || !pass) {
+      err.textContent = '⚠ Veuillez remplir tous les champs.';
+      err.classList.add('show'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+
+    try {
+      const res  = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.email_unverified) {
+          warn.innerHTML = `⚠ Email non confirmé. <button class="resend-btn" onclick="resendVerif('${email}')">Renvoyer le lien</button>`;
+          warn.classList.add('show');
+        } else if (data.pending_approval) {
+          warn.innerHTML = `⏳ Votre compte est <strong>en attente d'approbation</strong> par l'administrateur. Vous serez notifié par email.`;
+          warn.classList.add('show');
+        } else {
+          err.textContent = '⚠ ' + (data.error || 'Identifiants incorrects.');
+          err.classList.add('show');
+        }
+      } else {
+        localStorage.setItem('up_token', data.token);
+        localStorage.setItem('up_user', JSON.stringify(data.user));
+        redirectByRole(data.user.role);
+      }
+    } catch {
+      err.textContent = '⚠ Erreur réseau.';
+      err.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+    }
+  }
+
+  async function resendVerif(email) {
+    await fetch('/api/auth/resend-verification', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    document.getElementById('login-warn').innerHTML = '✅ Email renvoyé. Vérifiez votre boîte de réception.';
+  }
+
+  async function doRegister() {
+    const nom    = document.getElementById('reg-nom').value.trim();
+    const prenom = document.getElementById('reg-prenom').value.trim();
+    const email  = document.getElementById('reg-email').value.trim();
+    const pass   = document.getElementById('reg-pass').value;
+    const confirm= document.getElementById('reg-confirm').value;
+    const role   = document.getElementById('reg-role').value;
+    const err = document.getElementById('reg-err');
+    const ok  = document.getElementById('reg-ok');
+    const btn = document.getElementById('reg-btn');
+    err.classList.remove('show'); ok.style.cssText = 'display:none !important';
+
+    if (!nom || !prenom || !email || !pass) {
+      err.textContent = '⚠ Veuillez remplir tous les champs.'; err.classList.add('show'); return;
+    }
+    if (pass !== confirm) {
+      err.textContent = '⚠ Les mots de passe ne correspondent pas.'; err.classList.add('show'); return;
+    }
+    if (pass.length < 8) {
+      err.textContent = '⚠ Mot de passe trop court (8 caractères min).'; err.classList.add('show'); return;
+    }
+
+    const body = { nom, prenom, email, password: pass, role };
+    if (role === 'etudiant') {
+      body.matricule = document.getElementById('reg-matricule').value.trim();
+      body.niveau_id = document.getElementById('reg-niveau').value;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error);
+      ok.innerHTML = `✅ Compte créé ! Confirmez votre email, puis attendez l'approbation de l'administrateur.`;
+      ok.style.cssText = 'display:block';
+    } catch (e) {
+      err.textContent = '⚠ ' + (e.message || 'Erreur lors de la création.');
+      err.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-user-plus"></i> Créer mon compte';
+    }
+  }
+
+  async function doForgot() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const ok  = document.getElementById('forgot-ok');
+    const err = document.getElementById('forgot-err');
+    const btn = document.getElementById('forgot-btn');
+    ok.style.cssText = 'display:none !important'; err.classList.remove('show');
+
+    if (!email) {
+      err.textContent = '⚠ Veuillez entrer votre email.'; err.classList.add('show'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+    try {
+      await fetch('/api/auth/forgot-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      ok.innerHTML = '📧 Si cet email est lié à un compte actif, un lien de réinitialisation a été envoyé.';
+      ok.style.cssText = 'display:block';
+      document.getElementById('forgot-email').value = '';
+    } catch {
+      err.textContent = '❌ Erreur réseau.'; err.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer le lien';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const active = document.querySelector('.panel.active');
+      if (active.id === 'panel-login') doLogin();
+      else if (active.id === 'panel-forgot') doForgot();
+    }
+  });
+</script>
+</body>
+</html>

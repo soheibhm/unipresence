@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UniPresence | Professeur</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0c0b14;--bg2:#100f1c;--card:#13111f;--el:#1a1730;--border:rgba(139,92,246,.15);--bstrong:rgba(139,92,246,.35);--p:#8b5cf6;--pl:#a78bfa;--pd:#6d28d9;--pglow:rgba(139,92,246,.2);--ps:rgba(139,92,246,.07);--t:#f1eeff;--ts:#a89ec4;--tm:#5c5478;--ok:#34d399;--err:#f87171;--warn:#fbbf24;--info:#38bdf8;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--t);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(56,189,248,.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
+    body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(139,92,246,.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+    .grid-o{position:fixed;inset:0;background-image:linear-gradient(rgba(139,92,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+    /* NAVBAR */
+    .navbar{background:rgba(12,11,20,.88)!important;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.85rem 0;position:sticky;top:0;z-index:1000;}
+    .nb{font-family:'Inter',sans-serif;font-weight:800;font-size:1.15rem;color:var(--t)!important;display:flex;align-items:center;gap:9px;}
+    .bicon{width:30px;height:30px;background:linear-gradient(135deg,var(--info),#0284c7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;box-shadow:0 0 14px rgba(56,189,248,.3);}
+    .btag{font-size:.6rem;font-weight:600;letter-spacing:.14em;color:#7dd3fc;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);border-radius:4px;padding:1px 6px;text-transform:uppercase;}
+    .role-badge{background:rgba(56,189,248,.15);color:#7dd3fc;border:1px solid rgba(56,189,248,.3);border-radius:20px;padding:.25rem .7rem;font-size:.72rem;font-weight:600;}
+    .ndiv{width:1px;height:18px;background:var(--border);margin:0 4px;}
+    .nl{color:var(--ts)!important;font-size:.8rem;font-weight:500;padding:.4rem .8rem!important;border-radius:8px;transition:all .2s;display:flex;align-items:center;gap:6px;}
+    .nl:hover{color:var(--t)!important;background:var(--ps);}
+    .nl.logout{color:var(--err)!important;}
+    .nl.logout:hover{background:rgba(248,113,113,.08)!important;}
+
+    /* HAMBURGER */
+    .hamburger{display:none;background:none;border:none;color:var(--ts);font-size:1.25rem;cursor:pointer;padding:.4rem .5rem;border-radius:8px;transition:all .2s;}
+    .hamburger:hover{background:var(--ps);color:var(--t);}
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;backdrop-filter:blur(2px);}
+    .sidebar-overlay.show{display:block;}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;left:0;top:62px;bottom:0;width:230px;background:var(--bg2);border-right:1px solid var(--border);padding:1.25rem .7rem;overflow-y:auto;z-index:100;}
+    .ss{font-family:'Inter',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tm);padding:0 .7rem;margin:1.1rem 0 .4rem;}
+    .ss:first-child{margin-top:0;}
+    .sl{display:flex;align-items:center;gap:8px;padding:.46rem .7rem;border-radius:9px;font-size:.81rem;font-weight:500;color:var(--ts);text-decoration:none;transition:all .18s;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+    .sl:hover{background:var(--ps);color:var(--t);}
+    .sl.act{background:var(--ps);color:var(--pl);border:1px solid var(--border);}
+    .sl i{width:15px;color:var(--tm);font-size:.76rem;text-align:center;}
+    .sl.act i{color:var(--p);}
+
+    /* MAIN WRAPPER */
+    .mw{position:relative;z-index:1;margin-left:230px;padding:2rem 1.75rem 4rem;}
+    .page{display:none;}.page.act{display:block;}
+
+    /* CARDS */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s;}
+    .card:hover{border-color:var(--bstrong);}
+    .ch{background:var(--el);border-bottom:1px solid var(--border);padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;}
+    .ct{font-family:'Inter',sans-serif;font-weight:700;font-size:.92rem;color:var(--t);margin:0;display:flex;align-items:center;gap:7px;}
+    .ct i{color:var(--p);}
+    .cb{padding:1.4rem;}
+
+    /* STAT GRID */
+    .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.9rem;margin-bottom:1.4rem;}
+    .sc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1.1rem;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
+    .sc:hover{border-color:var(--bstrong);transform:translateY(-2px);}
+    .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--info),var(--p));}
+    .sl2{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:.5rem;}
+    .sv{font-family:'Inter',sans-serif;font-size:1.9rem;font-weight:800;color:var(--t);line-height:1;}
+    .si{position:absolute;right:1.1rem;top:1.1rem;font-size:1.4rem;color:var(--p);opacity:.35;}
+    .ssub{font-size:.72rem;color:var(--tm);margin-top:.35rem;}
+
+    /* PAGE HEADER */
+    .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.6rem;gap:1rem;}
+    .pt{font-family:'Inter',sans-serif;font-weight:800;font-size:1.5rem;color:var(--t);margin:0;}
+    .psub{font-size:.76rem;color:var(--tm);margin-top:3px;}
+
+    /* BUTTONS */
+    .btn{font-family:'Inter',sans-serif;font-weight:500;font-size:.81rem;border-radius:10px;padding:.46rem .95rem;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer;}
+    .bp{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 14px rgba(109,40,217,.3);}
+    .bp:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(109,40,217,.4);color:#fff;}
+    .bo{background:transparent;color:var(--ts);border:1px solid var(--border);}
+    .bo:hover{background:var(--ps);color:var(--t);border-color:var(--bstrong);}
+    .bd{background:rgba(248,113,113,.12);color:var(--err);border:1px solid rgba(248,113,113,.25);}
+    .bsuc{background:rgba(52,211,153,.12);color:var(--ok);border:1px solid rgba(52,211,153,.25);}
+    .bwarn{background:rgba(251,191,36,.12);color:var(--warn);border:1px solid rgba(251,191,36,.25);}
+    .bsm{padding:.28rem .65rem;font-size:.76rem;border-radius:8px;}
+    .blg{padding:.62rem 1.4rem;font-size:.88rem;}
+
+    /* TABLE */
+    .table{color:var(--ts);margin:0;font-size:.84rem;}
+    .table thead th{background:var(--el);color:var(--tm);font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:none;padding:.8rem 1.05rem;}
+    .table tbody td{border-bottom:1px solid var(--border);border-top:none;padding:.82rem 1.05rem;vertical-align:middle;background:transparent;}
+    .table tbody tr:last-child td{border-bottom:none;}
+    .table-hover tbody tr:hover td{background:var(--ps);color:var(--t);}
+
+    /* FORM */
+    .fc,.fs{background:var(--el);border:1px solid var(--border);color:var(--t);border-radius:10px;padding:.56rem .85rem;font-family:'Inter',sans-serif;font-size:.855rem;transition:all .2s;width:100%;}
+    .fc:focus,.fs:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(139,92,246,.14);outline:none;color:var(--t);}
+    .fc::placeholder{color:var(--tm);}
+    .fs option{background:var(--el);}
+    .fl{font-size:.78rem;font-weight:500;color:var(--ts);margin-bottom:.32rem;display:block;}
+
+    /* BADGES */
+    .badge{font-size:.69rem;font-weight:500;padding:.28em .62em;border-radius:6px;}
+    .ba{background:rgba(52,211,153,.15);color:#6ee7b7;}
+    .bi{background:rgba(56,189,248,.15);color:#7dd3fc;}
+    .bp2{background:rgba(139,92,246,.15);color:var(--pl);}
+    .bw{background:rgba(251,191,36,.15);color:#fde68a;}
+    .bm{background:rgba(255,255,255,.06);color:var(--tm);}
+    .ber{background:rgba(248,113,113,.15);color:#fca5a5;}
+
+    /* MODAL */
+    .modal-content{background:var(--card);border:1px solid var(--bstrong);border-radius:16px;}
+    .modal-header{border-bottom:1px solid var(--border);background:var(--el);border-radius:16px 16px 0 0;padding:1.05rem 1.4rem;}
+    .modal-title{font-family:'Inter',sans-serif;font-weight:700;font-size:.95rem;color:var(--t);}
+    .modal-footer{border-top:1px solid var(--border);padding:.95rem 1.4rem;}
+    .modal-body{padding:1.4rem;color:var(--ts);}
+    .btn-close{filter:invert(.5) sepia(1) saturate(0);}
+
+    /* ALERTS */
+    .alert{border:none;border-radius:12px;font-size:.84rem;padding:.8rem 1.05rem;}
+    .alert-success{background:rgba(52,211,153,.1);color:#6ee7b7;border-left:3px solid var(--ok);}
+    .alert-danger{background:rgba(248,113,113,.1);color:#fca5a5;border-left:3px solid var(--err);}
+    .alert-info{background:rgba(56,189,248,.08);color:#7dd3fc;border-left:3px solid var(--info);}
+
+    /* QR */
+    .qr-display{background:var(--el);border:2px solid var(--bstrong);border-radius:20px;padding:2rem;text-align:center;position:relative;overflow:hidden;}
+    .qr-display::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--p),transparent);animation:scanline 2s linear infinite;}
+    @keyframes scanline{0%{top:0}100%{top:100%}}
+
+    /* LOADING */
+    .loading{display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--tm);gap:8px;font-size:.85rem;}
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--bstrong);border-radius:3px;}
+
+    /* AV */
+    .av{width:36px;height:36px;background:var(--p);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:.75rem;color:#fff;margin:0 auto .35rem;}
+
+    /* ── MOBILE BOTTOM NAV ── */
+    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(16,15,28,.96);border-top:1px solid var(--border);backdrop-filter:blur(20px);z-index:200;padding:.4rem 0 calc(.4rem + env(safe-area-inset-bottom));}
+    .mobile-nav button{flex:1;background:none;border:none;color:var(--tm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:.45rem .25rem;font-size:.58rem;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:color .2s;}
+    .mobile-nav button i{font-size:1.05rem;}
+    .mobile-nav button.act{color:var(--pl);}
+    .mobile-nav button.act i{filter:drop-shadow(0 0 6px rgba(139,92,246,.5));}
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 767px) {
+      .hamburger{display:block;}
+      .role-badge{display:none;}
+      .ndiv{display:none!important;}
+      #user-info{display:none!important;}
+      .sidebar{transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:1001;top:0;padding-top:72px;width:260px;box-shadow:4px 0 30px rgba(0,0,0,.5);}
+      .sidebar.open{transform:translateX(0);}
+      .mw{margin-left:0!important;padding:1.1rem .9rem 5.5rem!important;}
+      .mobile-nav{display:flex;}
+      .ph{flex-direction:column!important;gap:.75rem!important;}
+      .ph .btn{width:100%!important;justify-content:center;}
+      .sg{grid-template-columns:repeat(2,1fr)!important;}
+      .pt{font-size:1.2rem!important;}
+      /* hide non-essential table columns on mobile */
+      .table .hide-mobile{display:none;}
+      /* QR page step indicators */
+      #step1-indicator span, #step2-indicator span{display:none;}
+      /* Stack QR page row */
+      #qr-main-row{flex-direction:column!important;}
+      #qr-main-row > div{max-width:100%!important;width:100%!important;flex:0 0 100%!important;}
+      .modal-dialog{margin:.75rem!important;}
+    }
+    @media (max-width:480px){
+      .sg{grid-template-columns:repeat(2,1fr)!important;}
+      .sv{font-size:1.5rem!important;}
+    }
+    @media (min-width:768px){
+      .hamburger{display:none!important;}
+      .mobile-nav{display:none!important;}
+      .sidebar-overlay{display:none!important;}
+    }
+  </style>
+</head>
+<body>
+<div class="grid-o"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid px-4">
+    <button class="hamburger me-2" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <a class="nb" href="#"><div class="bicon"><i class="fas fa-qrcode" style="color:#fff;"></i></div>UniPresence<span class="btag">Professeur</span></a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="role-badge"><i class="fas fa-chalkboard-teacher me-1"></i>Professeur</span>
+      <div class="ndiv"></div>
+      <span id="user-info" style="font-size:.8rem;color:var(--ts);">Chargement...</span>
+      <div class="ndiv"></div>
+      <a class="nl logout" href="#" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="ss">Tableau de bord</div>
+  <button class="sl act" onclick="sp('dashboard',this)"><i class="fas fa-th-large"></i> Accueil</button>
+  <div class="ss">Séances</div>
+  <button class="sl" onclick="sp('seances',this)"><i class="fas fa-calendar-check"></i> Mes séances</button>
+  <button class="sl" onclick="sp('nouvelle-seance',this)"><i class="fas fa-plus-circle"></i> Nouvelle séance</button>
+  <button class="sl" onclick="sp('qrcode',this)"><i class="fas fa-qrcode"></i> Générer QR Code</button>
+  <div class="ss">Gestion</div>
+  <button class="sl" onclick="sp('presences',this)"><i class="fas fa-clipboard-list"></i> Feuilles présence</button>
+  <button class="sl" onclick="sp('justifications',this)"><i class="fas fa-file-alt"></i> Justifications</button>
+  <div class="ss">Modules</div>
+  <button class="sl" onclick="sp('modules',this)"><i class="fas fa-book"></i> Mes modules</button>
+</aside>
+
+<!-- MAIN WRAPPER -->
+<div class="mw">
+
+  <!-- DASHBOARD -->
+  <div class="page act" id="page-dashboard">
+    <div class="ph">
+      <div>
+        <h2 class="pt">Bonjour, <span id="dash-nom">Dr.</span> 👋</h2>
+        <p class="psub" id="dash-sub">Chargement...</p>
+      </div>
+      <button class="btn bp blg" onclick="sp('nouvelle-seance',document.querySelectorAll('.sl')[3])"><i class="fas fa-plus"></i> Nouvelle Séance</button>
+    </div>
+    <div class="sg" id="dash-stats">
+      <div class="sc"><div class="sl2">Modules</div><div class="sv">—</div><i class="fas fa-book si"></i></div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-clock"></i>Prochaines séances</span><button class="btn bo bsm" onclick="sp('seances',document.querySelectorAll('.sl')[2])">Voir tout</button></div>
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Module</th><th>Type</th><th class="hide-mobile">Groupe</th><th>Date</th><th class="hide-mobile">Heure</th><th>QR</th></tr></thead>
+              <tbody id="prochaines-body"><tr><td colspan="6" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-file-alt"></i>Justifications en attente</span></div>
+          <div id="dash-justif"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEANCES -->
+  <div class="page" id="page-seances">
+    <div class="ph">
+      <div><h2 class="pt">Mes Séances</h2><p class="psub">Historique et planning</p></div>
+      <button class="btn bp" onclick="sp('nouvelle-seance',document.querySelectorAll('.sl')[3])"><i class="fas fa-plus"></i> Nouvelle Séance</button>
+    </div>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead><tr><th>Module</th><th>Type</th><th class="hide-mobile">Groupe</th><th class="hide-mobile">Date</th><th class="hide-mobile">Salle</th><th>Présents</th><th class="hide-mobile">Taux</th><th>Actions</th></tr></thead>
+          <tbody id="seances-body"><tr><td colspan="8" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOUVELLE SÉANCE -->
+  <div class="page" id="page-nouvelle-seance">
+    <div class="ph"><div><h2 class="pt">Nouvelle Séance</h2><p class="psub">Créer et planifier une séance</p></div></div>
+    <div class="row g-3 justify-content-center">
+      <div class="col-md-7">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-plus-circle"></i>Informations de la séance</span></div>
+          <div class="cb">
+            <div id="new-seance-msg"></div>
+            <div class="row g-3">
+              <div class="col-md-8 col-12"><label class="fl">Module</label><select class="fs" id="ns-module" onchange="loadGroupes()"><option value="">-- Sélectionnez un module --</option></select></div>
+              <div class="col-md-4 col-12"><label class="fl">Type</label>
+                <select class="fs" id="ns-type">
+                  <option value="CM">CM</option>
+                  <option value="TD" selected>TD</option>
+                  <option value="TP">TP</option>
+                </select>
+              </div>
+              <div class="col-md-6 col-12"><label class="fl">Groupe</label><select class="fs" id="ns-groupe"><option value="">-- Choisissez d'abord un module --</option></select></div>
+              <div class="col-md-6 col-12"><label class="fl">Date</label><input type="date" class="fc" id="ns-date"></div>
+              <div class="col-4"><label class="fl">Heure début</label><input type="time" class="fc" id="ns-debut" value="08:30"></div>
+              <div class="col-4"><label class="fl">Heure fin</label><input type="time" class="fc" id="ns-fin" value="10:00"></div>
+              <div class="col-4"><label class="fl">Salle</label><input type="text" class="fc" id="ns-salle" placeholder="B1"></div>
+              <div class="col-12"><button class="btn bp blg w-100" onclick="createSeance()"><i class="fas fa-check"></i> Créer la séance</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR CODE -->
+  <div class="page" id="page-qrcode">
+    <div class="ph">
+      <div><h2 class="pt"><i class="fas fa-qrcode" style="color:var(--p);font-size:1rem;margin-right:8px;"></i>Générer QR Code</h2><p class="psub">Validité 15 minutes — renouvelable</p></div>
+    </div>
+    <!-- Step indicator -->
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem;">
+      <div id="step1-indicator" style="display:flex;align-items:center;gap:8px;padding:.5rem .9rem;border-radius:8px;background:var(--ps);border:1px solid var(--border);">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;">1</div>
+        <span style="font-size:.8rem;color:var(--pl);font-weight:600;">Choisir / Créer une séance</span>
+      </div>
+      <div style="flex:0 0 20px;height:1px;background:var(--border);"></div>
+      <div id="step2-indicator" style="display:flex;align-items:center;gap:8px;padding:.5rem .9rem;border-radius:8px;background:transparent;border:1px solid var(--border);opacity:.5;">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--el);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--tm);flex-shrink:0;">2</div>
+        <span style="font-size:.8rem;color:var(--ts);font-weight:600;">Générer & Afficher le QR</span>
+      </div>
+    </div>
+    <div class="row g-3" id="qr-main-row">
+      <div class="col-md-5">
+        <div class="card mb-3">
+          <div class="ch" style="cursor:pointer;" onclick="toggleQrPanel('existing')">
+            <span class="ct"><i class="fas fa-list"></i>Séances existantes</span>
+            <i class="fas fa-chevron-down" id="qr-existing-chevron" style="color:var(--tm);font-size:.75rem;transition:transform .2s;"></i>
+          </div>
+          <div id="qr-existing-body" class="cb">
+            <div id="qr-no-seances-msg" style="display:none;" class="alert alert-info" style="font-size:.78rem;"><i class="fas fa-info-circle me-2"></i>Aucune séance trouvée.</div>
+            <div class="mb-3"><label class="fl">Sélectionner une séance</label><select class="fs" id="qr-seance" onchange="onQrSeanceChange()"><option value="">⏳ Chargement...</option></select></div>
+            <div class="alert alert-info" style="font-size:.78rem;margin-bottom:1rem;"><i class="fas fa-info-circle me-2"></i>Le QR expire après 15 min.</div>
+            <button class="btn bp blg w-100" onclick="genQR()" id="btn-gen-qr" disabled><i class="fas fa-bolt"></i> Générer QR Code</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch" style="cursor:pointer;" onclick="toggleQrPanel('create')">
+            <span class="ct"><i class="fas fa-plus-circle" style="color:var(--ok);"></i>Créer une séance maintenant</span>
+            <i class="fas fa-chevron-right" id="qr-create-chevron" style="color:var(--tm);font-size:.75rem;transition:transform .2s;"></i>
+          </div>
+          <div id="qr-create-body" class="cb" style="display:none;">
+            <div id="qr-create-msg"></div>
+            <div class="row g-2">
+              <div class="col-12"><label class="fl">Module</label><select class="fs" id="qrc-module" onchange="qrcLoadGroupes()"><option value="">-- Sélectionnez --</option></select></div>
+              <div class="col-6"><label class="fl">Type</label><select class="fs" id="qrc-type"><option value="CM">CM</option><option value="TD" selected>TD</option><option value="TP">TP</option></select></div>
+              <div class="col-6"><label class="fl">Groupe</label><select class="fs" id="qrc-groupe"><option value="">-- Module d'abord --</option></select></div>
+              <div class="col-12"><label class="fl">Date</label><input type="date" class="fc" id="qrc-date"></div>
+              <div class="col-6"><label class="fl">Début</label><input type="time" class="fc" id="qrc-debut" value="08:30"></div>
+              <div class="col-6"><label class="fl">Fin</label><input type="time" class="fc" id="qrc-fin" value="10:00"></div>
+              <div class="col-12"><label class="fl">Salle <span style="color:var(--tm)">(optionnel)</span></label><input type="text" class="fc" id="qrc-salle" placeholder="ex: B1"></div>
+              <div class="col-12 mt-1"><button class="btn bp w-100" onclick="qrcCreateAndGenerate()" id="btn-qrc-create"><i class="fas fa-magic"></i> Créer et générer le QR</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card h-100">
+          <div class="ch"><span class="ct"><i class="fas fa-qrcode"></i>QR Code actif</span><span id="qr-timer" style="font-size:.78rem;color:var(--warn);"></span></div>
+          <div class="cb">
+            <div id="qr-area">
+              <div style="text-align:center;padding:3rem 2rem;color:var(--tm);">
+                <i class="fas fa-qrcode" style="font-size:4rem;opacity:.2;margin-bottom:1.25rem;display:block;"></i>
+                <div style="font-size:.9rem;margin-bottom:.5rem;">Aucun QR Code actif</div>
+                <div style="font-size:.78rem;">Sélectionnez une séance ou créez-en une, puis cliquez sur <strong style="color:var(--pl);">Générer QR Code</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRÉSENCES -->
+  <div class="page" id="page-presences">
+    <div class="ph"><div><h2 class="pt">Feuilles de Présence</h2><p class="psub">Consulter et modifier les présences</p></div></div>
+    <div class="row g-3 mb-3">
+      <div class="col-md-5 col-12">
+        <label class="fl">Sélectionner une séance</label>
+        <select class="fs" id="pres-seance" onchange="loadPresences()"><option value="">-- Choisissez une séance --</option></select>
+      </div>
+    </div>
+    <div id="pres-content"><div style="padding:2rem;text-align:center;color:var(--tm);">Sélectionnez une séance.</div></div>
+  </div>
+
+  <!-- JUSTIFICATIONS -->
+  <div class="page" id="page-justifications">
+    <div class="ph"><div><h2 class="pt">Justifications</h2><p class="psub">Gérer les demandes de justification</p></div></div>
+    <div id="justif-list"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="page" id="page-modules">
+    <div class="ph"><div><h2 class="pt">Mes Modules</h2><p class="psub">Vue d'ensemble de vos enseignements</p></div></div>
+    <div id="modules-list"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+  </div>
+
+</div><!-- mw -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="act" id="mnav-dashboard" onclick="sp('dashboard',this);mnavAct(this)"><i class="fas fa-th-large"></i>Accueil</button>
+  <button id="mnav-seances" onclick="sp('seances',this);mnavAct(this)"><i class="fas fa-calendar-check"></i>Séances</button>
+  <button id="mnav-qrcode" onclick="sp('qrcode',this);mnavAct(this)"><i class="fas fa-qrcode"></i>QR Code</button>
+  <button id="mnav-justifications" onclick="sp('justifications',this);mnavAct(this)"><i class="fas fa-file-alt"></i>Justifs</button>
+  <button id="mnav-modules" onclick="sp('modules',this);mnavAct(this)"><i class="fas fa-book"></i>Modules</button>
+</nav>
+
+<!-- MODAL justification -->
+<div class="modal fade" id="m-justif" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fas fa-file-alt me-2" style="color:var(--p);"></i>Traiter la justification</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="jm-info" class="mb-3"></div>
+        <label class="fl">Commentaire (optionnel)</label>
+        <textarea class="fc" id="jm-comment" rows="3" placeholder="Motif de refus ou commentaire..." style="resize:none;height:auto;"></textarea>
+        <input type="hidden" id="jm-id">
+      </div>
+      <div class="modal-footer">
+        <button class="btn bo" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn bd" onclick="traiterJustif('refusee')"><i class="fas fa-times"></i> Refuser</button>
+        <button class="btn bsuc" onclick="traiterJustif('acceptee')"><i class="fas fa-check"></i> Accepter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="/api.js"></script>
+<script>
+  const user = API.requireAuth('professeur');
+  if (!user) throw new Error('Not authenticated');
+
+  document.getElementById('user-info').innerHTML =
+    `<i class="fas fa-circle" style="font-size:.5rem;color:var(--ok);margin-right:4px;"></i>Dr. ${user.nom}`;
+
+  let allSeances = [];
+  let qrInterval = null;
+
+  function sp(id, el) {
+    if (window.innerWidth < 768) {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('show');
+    }
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('act'));
+    document.querySelectorAll('.sl').forEach(l => l.classList.remove('act'));
+    document.getElementById('page-' + id).classList.add('act');
+    if (el?.classList?.contains('sl')) el.classList.add('act');
+    if (id==='seances')         loadSeances();
+    if (id==='justifications')  loadJustifications();
+    if (id==='modules')         loadModules();
+    if (id==='presences')       loadSeancesSelect();
+    if (id==='qrcode')          loadSeancesQR();
+    if (id==='nouvelle-seance') loadModulesSelect();
+  }
+
+  function om(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
+
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const isOpen  = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    overlay.classList.toggle('show', !isOpen);
+  }
+
+  function mnavAct(el) {
+    document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('act'));
+    el.classList.add('act');
+  }
+
+  // ── DASHBOARD ─────────────────────────────────────────────────
+  async function loadDashboard() {
+    try {
+      const data = await API.get('/prof/dashboard');
+      const s = data.stats;
+      document.getElementById('dash-nom').textContent = `Dr. ${user.nom}`;
+      document.getElementById('dash-sub').textContent = `${s.total_modules||0} modules · Semestre 1`;
+      document.getElementById('dash-stats').innerHTML = `
+        <div class="sc"><div class="sl2">Modules</div><div class="sv">${s.total_modules||0}</div><i class="fas fa-book si"></i></div>
+        <div class="sc"><div class="sl2">Séances total</div><div class="sv">${s.total_seances||0}</div><i class="fas fa-calendar si"></i></div>
+        <div class="sc"><div class="sl2">Taux global</div><div class="sv">${s.taux_global||0}<span style="font-size:.9rem;color:var(--tm)">%</span></div><i class="fas fa-chart-line si"></i></div>
+        <div class="sc"><div class="sl2">Justifications</div><div class="sv" style="color:var(--warn);">${s.justif_attente||0}</div><div class="ssub">en attente</div><i class="fas fa-file-alt si" style="color:var(--warn);"></i></div>`;
+
+      document.getElementById('prochaines-body').innerHTML = data.prochaines?.length
+        ? data.prochaines.map(s => `<tr>
+            <td style="color:var(--t);">${s.module}</td>
+            <td><span class="badge ${s.type==='TP'?'bw':'bi'}">${s.type}</span></td>
+            <td class="hide-mobile"><span class="badge bp2">${s.groupe}</span></td>
+            <td class="hide-mobile" style="color:var(--tm);font-size:.76rem;">${fmtDate(s.date_seance)}</td>
+            <td class="hide-mobile">${s.heure_debut?.slice(0,5)}</td>
+            <td><button class="btn bsuc bsm" onclick="loadSeancesQR(${s.id});sp('qrcode',null)"><i class="fas fa-qrcode"></i></button></td>
+          </tr>`).join('')
+        : '<tr><td colspan="6" class="text-center py-3" style="color:var(--tm);">Aucune séance à venir</td></tr>';
+
+      const justifs = await API.get('/prof/justifications');
+      const pending = justifs.filter(j=>j.statut==='en_attente');
+      document.getElementById('dash-justif').innerHTML = pending.length
+        ? pending.slice(0,4).map(j => `
+          <div style="padding:.8rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+            <div style="min-width:0;"><div style="font-size:.8rem;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${j.etudiant_nom}</div><div style="font-size:.72rem;color:var(--tm);">${j.module} — ${fmtDate(j.date_seance)}</div></div>
+            <button class="btn bwarn bsm flex-shrink-0" onclick="openJustif(${j.id},'${j.etudiant_nom}','${j.module}','${fmtDate(j.date_seance)}')"><i class="fas fa-check"></i></button>
+          </div>`).join('')
+        : '<div style="padding:1.5rem;text-align:center;color:var(--tm);font-size:.82rem;">Aucune justification en attente</div>';
+    } catch (e) { console.error(e); }
+  }
+
+  // ── SEANCES ───────────────────────────────────────────────────
+  async function loadSeances() {
+    try {
+      const data = await API.get('/prof/seances');
+      allSeances = data;
+      document.getElementById('seances-body').innerHTML = data.length
+        ? data.map(s => {
+          const taux = s.nb_inscrits ? Math.round(s.nb_presents*100/s.nb_inscrits) : 0;
+          const tc = taux>=85?'var(--ok)':taux>=75?'var(--warn)':'var(--err)';
+          return `<tr>
+            <td style="color:var(--t);">${s.module}</td>
+            <td><span class="badge ${s.type==='TP'?'bw':'bi'}">${s.type}</span></td>
+            <td class="hide-mobile"><span class="badge bp2">${s.groupe}</span></td>
+            <td class="hide-mobile" style="color:var(--tm);font-size:.76rem;">${fmtDate(s.date_seance)}</td>
+            <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${s.salle||'—'}</td>
+            <td>${s.nb_presents||0}/${s.nb_inscrits||0}</td>
+            <td class="hide-mobile" style="color:${tc};font-weight:600;">${taux}%</td>
+            <td class="d-flex gap-1">
+              <button class="btn bsuc bsm" onclick="loadQRForSeance(${s.id})" title="QR"><i class="fas fa-qrcode"></i></button>
+              <button class="btn bo bsm" onclick="viewPresences(${s.id})" title="Présences"><i class="fas fa-eye"></i></button>
+            </td>
+          </tr>`;}).join('')
+        : '<tr><td colspan="8" class="text-center py-4" style="color:var(--tm);">Aucune séance.</td></tr>';
+    } catch (e) { console.error(e); }
+  }
+
+  // ── NOUVELLE SÉANCE ───────────────────────────────────────────
+  async function loadModulesSelect() {
+    try {
+      const modules = await API.get('/prof/modules');
+      const sel = document.getElementById('ns-module');
+      if (!modules.length) {
+        sel.innerHTML = '<option value="">Aucun module assigné</option>';
+        document.getElementById('new-seance-msg').innerHTML =
+          '<div class="alert alert-info mb-3"><i class="fas fa-info-circle me-2"></i>Aucun module ne vous est encore assigné.</div>';
+      } else {
+        sel.innerHTML = '<option value="">-- Sélectionnez un module --</option>' +
+          modules.map(m => `<option value="${m.id}" data-niveau="${m.niveau_id}">${m.code} — ${m.intitule} (${m.niveau})</option>`).join('');
+        document.getElementById('new-seance-msg').innerHTML = '';
+      }
+      document.getElementById('ns-date').value = new Date().toISOString().split('T')[0];
+    } catch (e) {
+      document.getElementById('new-seance-msg').innerHTML = `<div class="alert alert-danger mb-3">⚠ ${e.message}</div>`;
+    }
+  }
+
+  async function loadGroupes() {
+    const moduleId = document.getElementById('ns-module').value;
+    const groupeSel = document.getElementById('ns-groupe');
+    if (!moduleId) { groupeSel.innerHTML = '<option value="">-- Choisissez d\'abord un module --</option>'; return; }
+    try {
+      const [modules, groupes] = await Promise.all([API.get('/prof/modules'), API.get('/prof/groupes')]);
+      const mod = modules.find(m => String(m.id) === String(moduleId));
+      const filtered = mod ? groupes.filter(g => g.niveau_id === mod.niveau_id) : groupes;
+      groupeSel.innerHTML = filtered.length
+        ? filtered.map(g => `<option value="${g.id}">${g.nom} (${g.type}) — ${g.nb_etudiants||0} étudiants</option>`).join('')
+        : '<option value="">Aucun groupe disponible</option>';
+    } catch (e) { groupeSel.innerHTML = '<option value="">Erreur</option>'; }
+  }
+
+  async function createSeance() {
+    const module_id   = document.getElementById('ns-module').value;
+    const groupe_id   = document.getElementById('ns-groupe').value;
+    const type        = document.getElementById('ns-type').value;
+    const date_seance = document.getElementById('ns-date').value;
+    const heure_debut = document.getElementById('ns-debut').value;
+    const heure_fin   = document.getElementById('ns-fin').value;
+    const salle       = document.getElementById('ns-salle').value;
+    const msg         = document.getElementById('new-seance-msg');
+    if (!module_id || !groupe_id || !date_seance) {
+      msg.innerHTML = '<div class="alert alert-danger mb-3">⚠ Module, groupe et date sont obligatoires.</div>'; return;
+    }
+    try {
+      await API.post('/prof/seances', { module_id, groupe_id, type, date_seance, heure_debut, heure_fin: heure_fin||'10:00', salle });
+      msg.innerHTML = '<div class="alert alert-success mb-3">✓ Séance créée !</div>';
+      setTimeout(() => { msg.innerHTML=''; sp('seances', document.querySelectorAll('.sl')[2]); }, 2000);
+    } catch (e) { msg.innerHTML = `<div class="alert alert-danger mb-3">⚠ ${e.message}</div>`; }
+  }
+
+  // ── QR CODE ───────────────────────────────────────────────────
+  async function loadSeancesQR(preselect) {
+    try {
+      const data = await API.get('/prof/seances');
+      const sel = document.getElementById('qr-seance');
+      if (!data.length) {
+        sel.innerHTML = '<option value="">Aucune séance — créez-en une ↓</option>';
+        document.getElementById('qr-no-seances-msg').style.display = 'block';
+        document.getElementById('btn-gen-qr').disabled = true;
+        document.getElementById('qr-create-body').style.display = 'block';
+        document.getElementById('qr-create-chevron').style.transform = 'rotate(90deg)';
+        qrcLoadModules();
+      } else {
+        document.getElementById('qr-no-seances-msg').style.display = 'none';
+        sel.innerHTML = '<option value="">-- Choisissez une séance --</option>' +
+          data.map(s => `<option value="${s.id}" ${preselect==s.id?'selected':''}>${s.code} ${s.type} — ${s.groupe} — ${fmtDate(s.date_seance)} ${s.heure_debut?.slice(0,5)}${s.salle?' ('+s.salle+')':''}</option>`).join('');
+        if (preselect) { sel.value = preselect; document.getElementById('btn-gen-qr').disabled = false; }
+      }
+    } catch (e) { document.getElementById('qr-seance').innerHTML = '<option value="">Erreur</option>'; }
+  }
+
+  function onQrSeanceChange() {
+    const val = document.getElementById('qr-seance').value;
+    document.getElementById('btn-gen-qr').disabled = !val;
+    if (val) {
+      document.getElementById('step2-indicator').style.opacity = '1';
+      document.getElementById('step2-indicator').style.background = 'var(--ps)';
+    } else {
+      document.getElementById('step2-indicator').style.opacity = '0.5';
+      document.getElementById('step2-indicator').style.background = 'transparent';
+    }
+  }
+
+  function toggleQrPanel(panel) {
+    if (panel==='existing') {
+      const body = document.getElementById('qr-existing-body');
+      const chev = document.getElementById('qr-existing-chevron');
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      chev.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+    } else {
+      const body = document.getElementById('qr-create-body');
+      const chev = document.getElementById('qr-create-chevron');
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      chev.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+      if (!open) qrcLoadModules();
+    }
+  }
+
+  async function qrcLoadModules() {
+    try {
+      const modules = await API.get('/prof/modules');
+      const sel = document.getElementById('qrc-module');
+      if (!modules.length) {
+        sel.innerHTML = '<option value="">Aucun module assigné</option>';
+        document.getElementById('qr-create-msg').innerHTML = '<div class="alert alert-danger mb-2" style="font-size:.78rem;">Aucun module assigné.</div>';
+      } else {
+        sel.innerHTML = '<option value="">-- Sélectionnez un module --</option>' +
+          modules.map(m => `<option value="${m.id}" data-niveau="${m.niveau_id}">${m.code} — ${m.intitule} (${m.niveau})</option>`).join('');
+        document.getElementById('qrc-date').value = new Date().toISOString().split('T')[0];
+      }
+    } catch (e) {}
+  }
+
+  async function qrcLoadGroupes() {
+    const sel = document.getElementById('qrc-module');
+    const moduleId = sel.value;
+    const niveauId = sel.options[sel.selectedIndex]?.dataset?.niveau;
+    const groupeSel = document.getElementById('qrc-groupe');
+    if (!moduleId) { groupeSel.innerHTML = '<option value="">-- Module d\'abord --</option>'; return; }
+    try {
+      const groupes = await API.get('/prof/groupes');
+      const filtered = niveauId ? groupes.filter(g => String(g.niveau_id)===String(niveauId)) : groupes;
+      groupeSel.innerHTML = filtered.length
+        ? filtered.map(g => `<option value="${g.id}">${g.nom} (${g.type})</option>`).join('')
+        : '<option value="">Aucun groupe</option>';
+    } catch (e) {}
+  }
+
+  async function qrcCreateAndGenerate() {
+    const module_id   = document.getElementById('qrc-module').value;
+    const groupe_id   = document.getElementById('qrc-groupe').value;
+    const type        = document.getElementById('qrc-type').value;
+    const date_seance = document.getElementById('qrc-date').value;
+    const heure_debut = document.getElementById('qrc-debut').value;
+    const heure_fin   = document.getElementById('qrc-fin').value;
+    const salle       = document.getElementById('qrc-salle').value;
+    const msg         = document.getElementById('qr-create-msg');
+    const btn         = document.getElementById('btn-qrc-create');
+    if (!module_id || !groupe_id || !date_seance) {
+      msg.innerHTML = '<div class="alert alert-danger mb-2" style="font-size:.78rem;">⚠ Module, groupe et date obligatoires.</div>'; return;
+    }
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+    try {
+      const created = await API.post('/prof/seances', { module_id, groupe_id, type, date_seance, heure_debut, heure_fin: heure_fin||'10:00', salle });
+      const qrData  = await API.post(`/prof/seances/${created.id}/qr`, {});
+      showQRCode(qrData.token, new Date(qrData.expires_at));
+      await loadSeancesQR(created.id);
+      document.getElementById('qr-seance').value = created.id;
+      onQrSeanceChange();
+      msg.innerHTML = '<div class="alert alert-success mb-2" style="font-size:.78rem;">✓ Séance créée et QR généré !</div>';
+      setTimeout(() => { document.getElementById('qr-create-body').style.display='none'; document.getElementById('qr-create-chevron').style.transform='rotate(0deg)'; msg.innerHTML=''; }, 2500);
+    } catch (e) {
+      msg.innerHTML = `<div class="alert alert-danger mb-2" style="font-size:.78rem;">⚠ ${e.message}</div>`;
+    } finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-magic"></i> Créer et générer le QR'; }
+  }
+
+  function loadQRForSeance(id) { loadSeancesQR(id); sp('qrcode', null); }
+  function viewPresences(id) {
+    document.getElementById('pres-seance').value = id;
+    sp('presences', document.querySelectorAll('.sl')[5]);
+    loadPresences();
+  }
+
+  async function genQR() {
+    const seanceId = document.getElementById('qr-seance').value;
+    if (!seanceId) { alert('Sélectionnez une séance.'); return; }
+    const btn = document.getElementById('btn-gen-qr');
+    btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Génération...';
+    try {
+      const data = await API.post(`/prof/seances/${seanceId}/qr`, {});
+      showQRCode(data.token, new Date(data.expires_at));
+    } catch (e) { alert('Erreur: '+e.message); }
+    finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-bolt"></i> Générer QR Code'; }
+  }
+
+  function showQRCode(token, expiresAt) {
+    document.getElementById('step2-indicator').style.opacity='1';
+    document.getElementById('step2-indicator').style.background='rgba(52,211,153,.12)';
+    document.getElementById('step2-indicator').style.border='1px solid rgba(52,211,153,.3)';
+    document.getElementById('qr-area').innerHTML = `
+      <div class="qr-display">
+        <div style="margin-bottom:.75rem;font-size:.75rem;color:var(--ts);text-transform:uppercase;letter-spacing:.08em;font-weight:600;"><i class="fas fa-check-circle" style="color:var(--ok);margin-right:6px;"></i>QR Code actif</div>
+        <div id="qr-code-canvas" style="margin-bottom:1rem;display:flex;justify-content:center;"></div>
+        <div style="font-family:monospace;font-size:.88rem;letter-spacing:.1em;color:var(--pl);background:var(--bg);border:1px solid var(--bstrong);border-radius:8px;padding:.65rem 1rem;display:inline-block;word-break:break-all;margin-bottom:.75rem;">${token}</div>
+        <div style="font-size:.76rem;color:var(--ts);margin-bottom:.5rem;"><i class="fas fa-users me-1" style="color:var(--p);"></i>Les étudiants entrent ce code dans <strong>Scanner QR Code</strong></div>
+        <div class="alert alert-success mt-2 mb-0" style="font-size:.77rem;text-align:left;"><i class="fas fa-check-circle me-2"></i><strong>QR actif.</strong> Expire à ${expiresAt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}.</div>
+      </div>`;
+    if (window.QRCode) {
+      new QRCode(document.getElementById('qr-code-canvas'), { text:token, width:180, height:180, colorDark:'#a78bfa', colorLight:'#13111f', correctLevel:QRCode.CorrectLevel.M });
+    }
+    if (qrInterval) clearInterval(qrInterval);
+    qrInterval = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((expiresAt-Date.now())/1000));
+      const m=Math.floor(remaining/60), s=remaining%60;
+      const el=document.getElementById('qr-timer');
+      if (el) { el.textContent=remaining>0?`⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} restant`:'⚠ Expiré'; el.style.color=remaining<120?'var(--err)':'var(--warn)'; }
+      if (remaining===0) clearInterval(qrInterval);
+    }, 1000);
+  }
+
+  // ── PRÉSENCES ─────────────────────────────────────────────────
+  async function loadSeancesSelect() {
+    try {
+      const data = await API.get('/prof/seances');
+      const sel = document.getElementById('pres-seance');
+      sel.innerHTML = '<option value="">-- Choisissez une séance --</option>' +
+        data.map(s => `<option value="${s.id}">${s.code} ${s.type} — ${s.groupe} — ${fmtDate(s.date_seance)}</option>`).join('');
+    } catch (e) {}
+  }
+
+  async function loadPresences() {
+    const seanceId = document.getElementById('pres-seance').value;
+    if (!seanceId) return;
+    const cont = document.getElementById('pres-content');
+    cont.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div>';
+    try {
+      const data = await API.get(`/prof/seances/${seanceId}/presences`);
+      const presents = data.filter(d=>d.statut==='present').length;
+      cont.innerHTML = `
+        <div class="sg mb-3">
+          <div class="sc"><div class="sl2">Présents</div><div class="sv" style="color:var(--ok);">${presents}</div><i class="fas fa-check si"></i></div>
+          <div class="sc"><div class="sl2">Absents</div><div class="sv" style="color:var(--err);">${data.length-presents}</div><i class="fas fa-times si" style="color:var(--err);"></i></div>
+          <div class="sc"><div class="sl2">Total</div><div class="sv">${data.length}</div><i class="fas fa-users si"></i></div>
+          <div class="sc"><div class="sl2">Taux</div><div class="sv">${data.length?Math.round(presents*100/data.length):0}%</div><i class="fas fa-percent si"></i></div>
+        </div>
+        <div class="card">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th class="hide-mobile">Matricule</th><th>Étudiant</th><th>Statut</th><th>Action</th></tr></thead>
+              <tbody>${data.map(d=>`
+                <tr>
+                  <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${d.matricule}</td>
+                  <td style="color:var(--t);">${d.nom_complet}</td>
+                  <td id="statut-${d.etudiant_id}">${statusBadge(d.statut)}</td>
+                  <td>
+                    <button class="btn bsuc bsm me-1" onclick="togglePresence(${seanceId},${d.etudiant_id},'present')" title="Présent"><i class="fas fa-check"></i></button>
+                    <button class="btn bd bsm" onclick="togglePresence(${seanceId},${d.etudiant_id},'absent')" title="Absent"><i class="fas fa-times"></i></button>
+                  </td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    } catch (e) { cont.innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
+  }
+
+  function statusBadge(s) {
+    if (s==='present')  return '<span class="badge ba">✓ Présent</span>';
+    if (s==='justifie') return '<span class="badge bw">⚠ Justifié</span>';
+    return '<span class="badge ber">✗ Absent</span>';
+  }
+
+  async function togglePresence(seanceId, etudiantId, statut) {
+    try {
+      await API.put(`/prof/seances/${seanceId}/presences`, { etudiant_id:etudiantId, statut });
+      document.getElementById('statut-'+etudiantId).innerHTML = statusBadge(statut);
+    } catch (e) { alert(e.message); }
+  }
+
+  // ── JUSTIFICATIONS ────────────────────────────────────────────
+  async function loadJustifications() {
+    try {
+      const data = await API.get('/prof/justifications');
+      document.getElementById('justif-list').innerHTML = data.length
+        ? data.map(j => `
+          <div class="card mb-3" style="border-left:3px solid ${j.statut==='en_attente'?'var(--warn)':j.statut==='acceptee'?'var(--ok)':'var(--err)'};">
+            <div class="cb">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;gap:.5rem;">
+                <div style="min-width:0;">
+                  <div style="font-size:.85rem;color:var(--t);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${j.etudiant_nom} — ${j.module}</div>
+                  <div style="font-size:.72rem;color:var(--tm);">${fmtDate(j.date_seance)} · ${j.seance_type} · ${j.motif}</div>
+                </div>
+                <span class="badge ${j.statut==='en_attente'?'bw':j.statut==='acceptee'?'ba':'ber'} flex-shrink-0">${j.statut==='en_attente'?'En attente':j.statut==='acceptee'?'Acceptée ✓':'Refusée ✗'}</span>
+              </div>
+              <div style="font-size:.8rem;color:var(--ts);background:var(--el);padding:.6rem;border-radius:8px;border:1px solid var(--border);">"${j.description||j.motif}"</div>
+              ${j.statut==='en_attente'?`<div style="margin-top:.75rem;"><button class="btn bwarn bsm" onclick="openJustif(${j.id},'${j.etudiant_nom}','${j.module}','${fmtDate(j.date_seance)}')"><i class="fas fa-check"></i> Traiter</button></div>`:''}
+            </div>
+          </div>`).join('')
+        : '<div class="card"><div class="cb text-center" style="color:var(--tm);padding:2rem;">Aucune justification.</div></div>';
+    } catch (e) { console.error(e); }
+  }
+
+  function openJustif(id, nom, module, date) {
+    document.getElementById('jm-id').value = id;
+    document.getElementById('jm-info').innerHTML = `<div style="background:var(--el);border:1px solid var(--border);border-radius:8px;padding:.75rem;font-size:.82rem;"><strong style="color:var(--t);">${nom}</strong><br><span style="color:var(--tm);">${module} — ${date}</span></div>`;
+    document.getElementById('jm-comment').value = '';
+    om('m-justif');
+  }
+
+  async function traiterJustif(statut) {
+    const id = document.getElementById('jm-id').value;
+    const commentaire = document.getElementById('jm-comment').value;
+    try {
+      await API.put(`/prof/justifications/${id}`, { statut, commentaire });
+      bootstrap.Modal.getInstance(document.getElementById('m-justif')).hide();
+      loadJustifications();
+    } catch (e) { alert(e.message); }
+  }
+
+  // ── MODULES ───────────────────────────────────────────────────
+  async function loadModules() {
+    try {
+      const data = await API.get('/prof/modules');
+      document.getElementById('modules-list').innerHTML = data.length
+        ? `<div class="row g-3">${data.map(m => `
+          <div class="col-md-4 col-12">
+            <div class="card">
+              <div class="ch"><span class="ct"><i class="fas fa-book"></i>${m.code}</span><span class="badge bp2">${m.niveau}</span></div>
+              <div class="cb">
+                <div style="font-weight:600;color:var(--t);margin-bottom:.5rem;">${m.intitule}</div>
+                <div style="font-size:.78rem;color:var(--tm);margin-bottom:.5rem;">${m.semestre} · Coeff. ${m.coefficient}</div>
+                <div style="display:flex;gap:.4rem;margin-bottom:.75rem;">${m.has_td?'<span class="badge bi">TD</span>':''}${m.has_tp?'<span class="badge bw">TP</span>':''}</div>
+                <div style="font-size:.76rem;color:var(--ts);">${m.nb_seances||0} séances · ${m.taux||0}% présence</div>
+              </div>
+            </div>
+          </div>`).join('')}</div>`
+        : '<div style="color:var(--tm);padding:2rem;text-align:center;">Aucun module assigné.</div>';
+    } catch (e) { console.error(e); }
+  }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

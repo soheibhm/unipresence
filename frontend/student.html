@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UniPresence | Étudiant</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0c0b14;--bg2:#100f1c;--card:#13111f;--el:#1a1730;--border:rgba(139,92,246,.15);--bstrong:rgba(139,92,246,.35);--p:#8b5cf6;--pl:#a78bfa;--pd:#6d28d9;--pglow:rgba(139,92,246,.2);--ps:rgba(139,92,246,.07);--t:#f1eeff;--ts:#a89ec4;--tm:#5c5478;--ok:#34d399;--err:#f87171;--warn:#fbbf24;--info:#38bdf8;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(52,211,153,.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+    body::after{content:'';position:fixed;bottom:-20%;right:-10%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(139,92,246,.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+    .grid-o{position:fixed;inset:0;background-image:linear-gradient(rgba(139,92,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+    .navbar{background:rgba(12,11,20,.88)!important;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.85rem 0;position:sticky;top:0;z-index:1000;}
+    .nb{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--t)!important;display:flex;align-items:center;gap:9px;}
+    .bicon{width:30px;height:30px;background:linear-gradient(135deg,var(--p),var(--pd));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;box-shadow:0 0 14px var(--pglow);}
+    .btag{font-size:.6rem;font-weight:600;letter-spacing:.14em;color:#6ee7b7;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:4px;padding:1px 6px;text-transform:uppercase;}
+    .role-badge{background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.3);border-radius:20px;padding:.25rem .7rem;font-size:.72rem;font-weight:600;}
+    .ndiv{width:1px;height:18px;background:var(--border);margin:0 4px;}
+    .nl{color:var(--ts)!important;font-size:.8rem;font-weight:500;padding:.4rem .8rem!important;border-radius:8px;transition:all .2s;display:flex;align-items:center;gap:6px;}
+    .nl:hover{color:var(--t)!important;background:var(--ps);}
+    .nl.logout{color:var(--err)!important;}
+    .nl.logout:hover{background:rgba(248,113,113,.08)!important;}
+    .sidebar{position:fixed;left:0;top:62px;bottom:0;width:230px;background:var(--bg2);border-right:1px solid var(--border);padding:1.25rem .7rem;overflow-y:auto;z-index:100;}
+    .ss{font-family:'Syne',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tm);padding:0 .7rem;margin:1.1rem 0 .4rem;}
+    .ss:first-child{margin-top:0;}
+    .sl{display:flex;align-items:center;gap:8px;padding:.46rem .7rem;border-radius:9px;font-size:.81rem;font-weight:500;color:var(--ts);text-decoration:none;transition:all .18s;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+    .sl:hover{background:var(--ps);color:var(--t);}
+    .sl.act{background:var(--ps);color:var(--pl);border:1px solid var(--border);}
+    .sl i{width:15px;color:var(--tm);font-size:.76rem;text-align:center;}
+    .sl.act i{color:var(--p);}
+    .mw{position:relative;z-index:1;margin-left:230px;padding:2rem 1.75rem 4rem;}
+    .page{display:none;}.page.act{display:block;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s;}
+    .card:hover{border-color:var(--bstrong);}
+    .ch{background:var(--el);border-bottom:1px solid var(--border);padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;}
+    .ct{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;color:var(--t);margin:0;display:flex;align-items:center;gap:7px;}
+    .ct i{color:var(--p);}
+    .cb{padding:1.4rem;}
+    .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.9rem;margin-bottom:1.4rem;}
+    .sc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1.1rem;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
+    .sc:hover{border-color:var(--bstrong);transform:translateY(-2px);}
+    .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--p),var(--pd));}
+    .sl2{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:.5rem;}
+    .sv{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--t);line-height:1;}
+    .si{position:absolute;right:1.1rem;top:1.1rem;font-size:1.4rem;color:var(--p);opacity:.35;}
+    .ssub{font-size:.72rem;color:var(--tm);margin-top:.35rem;}
+    .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.6rem;gap:1rem;}
+    .pt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--t);margin:0;}
+    .psub{font-size:.76rem;color:var(--tm);margin-top:3px;}
+    .btn{font-family:'DM Sans',sans-serif;font-weight:500;font-size:.81rem;border-radius:10px;padding:.46rem .95rem;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer;}
+    .bp{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 4px 14px rgba(109,40,217,.3);}
+    .bp:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(109,40,217,.4);color:#fff;filter:brightness(1.08);}
+    .bo{background:transparent;color:var(--ts);border:1px solid var(--border);}
+    .bo:hover{background:var(--ps);color:var(--t);border-color:var(--bstrong);}
+    .bd{background:rgba(248,113,113,.12);color:var(--err);border:1px solid rgba(248,113,113,.25);}
+    .bsuc{background:rgba(52,211,153,.12);color:var(--ok);border:1px solid rgba(52,211,153,.25);}
+    .bsm{padding:.28rem .65rem;font-size:.76rem;border-radius:8px;}
+    .blg{padding:.62rem 1.4rem;font-size:.88rem;}
+    .table{color:var(--ts);margin:0;font-size:.84rem;}
+    .table thead th{background:var(--el);color:var(--tm);font-family:'Syne',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:none;padding:.8rem 1.05rem;}
+    .table tbody td{border-bottom:1px solid var(--border);border-top:none;padding:.82rem 1.05rem;color:var(--ts);vertical-align:middle;background:transparent;}
+    .table tbody tr:last-child td{border-bottom:none;}
+    .table-hover tbody tr:hover td{background:var(--ps);color:var(--t);}
+    .fc,.fs{background:var(--el);border:1px solid var(--border);color:var(--t);border-radius:10px;padding:.56rem .85rem;font-family:'DM Sans',sans-serif;font-size:.855rem;transition:all .2s;width:100%;}
+    .fc:focus,.fs:focus{border-color:var(--p);color:var(--t);box-shadow:0 0 0 3px rgba(139,92,246,.14);outline:none;}
+    .fc::placeholder{color:var(--tm);}
+    .fs option{background:var(--el);}
+    .fl{font-size:.78rem;font-weight:500;color:var(--ts);margin-bottom:.32rem;display:block;}
+    .badge{font-size:.69rem;font-weight:500;padding:.28em .62em;border-radius:6px;}
+    .ba{background:rgba(52,211,153,.15);color:#6ee7b7;}
+    .bi{background:rgba(56,189,248,.15);color:#7dd3fc;}
+    .bp2{background:rgba(139,92,246,.15);color:var(--pl);}
+    .bw{background:rgba(251,191,36,.15);color:#fde68a;}
+    .bm{background:rgba(255,255,255,.06);color:var(--tm);}
+    .ber{background:rgba(248,113,113,.15);color:#fca5a5;}
+    .modal-content{background:var(--card);border:1px solid var(--bstrong);border-radius:16px;}
+    .modal-header{border-bottom:1px solid var(--border);background:var(--el);border-radius:16px 16px 0 0;padding:1.05rem 1.4rem;}
+    .modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--t);}
+    .modal-footer{border-top:1px solid var(--border);padding:.95rem 1.4rem;}
+    .modal-body{padding:1.4rem;color:var(--ts);}
+    .btn-close{filter:invert(.5) sepia(1) saturate(0);}
+    .pbw{background:var(--el);border-radius:99px;height:6px;overflow:hidden;}
+    .pbf{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--pl));transition:width .5s;}
+    .alert{border:none;border-radius:12px;font-size:.84rem;padding:.8rem 1.05rem;}
+    .alert-success{background:rgba(52,211,153,.1);color:#6ee7b7;border-left:3px solid var(--ok);}
+    .alert-danger{background:rgba(248,113,113,.1);color:#fca5a5;border-left:3px solid var(--err);}
+    .alert-warning{background:rgba(251,191,36,.1);color:#fde68a;border-left:3px solid var(--warn);}
+    code{color:var(--pl);background:rgba(139,92,246,.1);padding:.1em .38em;border-radius:4px;font-size:.82em;}
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--bstrong);border-radius:3px;}
+    .scan-zone{background:var(--el);border:2px dashed var(--bstrong);border-radius:20px;padding:3rem 2rem;text-align:center;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;}
+    .scan-zone:hover{border-color:var(--p);background:var(--ps);}
+    .scan-zone::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--p),transparent);animation:scanline 2s linear infinite;}
+    @keyframes scanline{0%{top:0}100%{top:100%}}
+    .scan-icon{font-size:4rem;color:var(--p);opacity:.6;margin-bottom:1rem;display:block;}
+    .scan-icon.anim{animation:pulse 1.5s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.1);opacity:1}}
+    .scan-success{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.5);cursor:default;}
+    .scan-success::before{background:linear-gradient(90deg,transparent,var(--ok),transparent);}
+    .donut-wrap{position:relative;width:140px;height:140px;margin:0 auto;}
+    .donut-svg{transform:rotate(-90deg);}
+    .donut-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .donut-pct{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;}
+    .donut-sub{font-size:.65rem;color:var(--tm);}
+    .timeline{position:relative;padding-left:1.5rem;}
+    .timeline::before{content:'';position:absolute;left:.4rem;top:0;bottom:0;width:1px;background:var(--border);}
+    .tl-item{position:relative;margin-bottom:1.1rem;}
+    .tl-dot{position:absolute;left:-1.35rem;top:.2rem;width:14px;height:14px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-size:.55rem;background:var(--bg);}
+    .tl-dot.ok{border-color:var(--ok);color:var(--ok);}
+    .tl-dot.abs{border-color:var(--err);color:var(--err);}
+    .tl-dot.just{border-color:var(--warn);color:var(--warn);}
+    .tl-label{font-size:.8rem;color:var(--t);font-weight:500;}
+    .tl-meta{font-size:.72rem;color:var(--tm);}
+    .loading{display:flex;align-items:center;justify-content:center;padding:2rem;color:var(--tm);gap:8px;font-size:.85rem;}
+    h1,h2,h3,h4,h5,h6{font-family:'Syne',sans-serif;color:var(--t);}
+    a{color:var(--pl);text-decoration:none;}
+
+    /* ── MOBILE HAMBURGER ── */
+    .hamburger{display:none;background:none;border:none;color:var(--ts);font-size:1.25rem;cursor:pointer;padding:.4rem .5rem;border-radius:8px;transition:all .2s;}
+    .hamburger:hover{background:var(--ps);color:var(--t);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px);}
+    .sidebar-overlay.show{display:block;}
+
+    /* ── MOBILE BOTTOM NAV ── */
+    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(16,15,28,.96);border-top:1px solid var(--border);backdrop-filter:blur(20px);z-index:200;padding:.4rem 0 calc(.4rem + env(safe-area-inset-bottom));gap:0;}
+    .mobile-nav button{flex:1;background:none;border:none;color:var(--tm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:.45rem .25rem;font-size:.58rem;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:color .2s;border-radius:0;position:relative;}
+    .mobile-nav button i{font-size:1.05rem;}
+    .mobile-nav button.act{color:var(--pl);}
+    .mobile-nav button.act i{filter:drop-shadow(0 0 6px var(--pglow));}
+
+    /* ── RESPONSIVE BREAKPOINTS ── */
+    @media (max-width: 767px) {
+      .navbar .d-flex{gap:.35rem!important;}
+      .ndiv{display:none!important;}
+      #user-info{display:none!important;}
+      .role-badge{display:none!important;}
+      .hamburger{display:block;}
+      .sidebar{transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:100;top:0;padding-top:72px;width:260px;box-shadow:4px 0 30px rgba(0,0,0,.5);}
+      .sidebar.open{transform:translateX(0);}
+      .mw{margin-left:0!important;padding:1.1rem .9rem 5.5rem!important;}
+      .mobile-nav{display:flex;}
+      .ph{flex-direction:column!important;gap:.75rem!important;}
+      .ph .btn{width:100%!important;justify-content:center;}
+      .sg{grid-template-columns:repeat(2,1fr)!important;}
+      .row.g-4.justify-content-center > .col-md-5,
+      .row.g-4.justify-content-center > .col-md-4{max-width:100%!important;width:100%!important;flex:0 0 100%!important;}
+      .pt{font-size:1.2rem!important;}
+      .donut-wrap{width:120px!important;height:120px!important;}
+      .modal-dialog{margin:.75rem!important;}
+    }
+    @media (max-width: 480px) {
+      .sg{grid-template-columns:repeat(2,1fr)!important;}
+      .sv{font-size:1.5rem!important;}
+      #camera-container{aspect-ratio:4/3!important;}
+    }
+    @media (min-width:768px){
+      .hamburger{display:none!important;}
+      .mobile-nav{display:none!important;}
+      .sidebar-overlay{display:none!important;}
+    }
+  </style>
+</head>
+<body>
+<div class="grid-o"></div>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid px-4">
+    <button class="hamburger me-2" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <a class="nb" href="#"><div class="bicon"><i class="fas fa-qrcode" style="color:#fff;"></i></div>UniPresence<span class="btag">Étudiant</span></a>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <span class="role-badge"><i class="fas fa-user-graduate me-1"></i>Étudiant</span>
+      <div class="ndiv"></div>
+      <span id="user-info" style="font-size:.8rem;color:var(--ts);"><i class="fas fa-circle" style="font-size:.5rem;color:var(--ok);margin-right:4px;"></i>Chargement...</span>
+      <div class="ndiv"></div>
+      <a class="nl logout" href="#" onclick="API.logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<aside class="sidebar">
+  <div class="ss">Mon espace</div>
+  <button class="sl act" onclick="sp('dashboard',this)"><i class="fas fa-th-large"></i> Accueil</button>
+  <button class="sl" onclick="sp('profil',this)"><i class="fas fa-user-circle"></i> Mon profil</button>
+  <div class="ss">Présences</div>
+  <button class="sl" onclick="sp('scanner',this)"><i class="fas fa-camera"></i> Scanner QR Code</button>
+  <button class="sl" onclick="sp('historique',this)"><i class="fas fa-history"></i> Historique</button>
+  <button class="sl" onclick="sp('justifications',this)"><i class="fas fa-file-alt"></i> Mes justifications</button>
+  <div class="ss">Statistiques</div>
+  <button class="sl" onclick="sp('stats',this)"><i class="fas fa-chart-bar"></i> Mes statistiques</button>
+</aside>
+
+<div class="mw">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="page act" id="page-dashboard">
+    <div class="ph">
+      <div>
+        <h2 class="pt"><i class="fas fa-hand-wave" style="color:var(--p);font-size:1.1rem;margin-right:9px;"></i>Bonjour, <span id="dash-prenom">...</span> 👋</h2>
+        <p class="psub" id="dash-sub">Chargement...</p>
+      </div>
+      <button class="btn bp blg" onclick="sp('scanner',document.querySelectorAll('.sl')[3])"><i class="fas fa-camera"></i> Scanner un QR Code</button>
+    </div>
+    <div class="sg" id="dash-stats">
+      <div class="sc"><div class="sl2">Taux global</div><div class="sv">—</div><i class="fas fa-chart-line si"></i></div>
+    </div>
+    <div class="row g-3 mb-3">
+      <div class="col-md-5">
+        <div class="card h-100">
+          <div class="ch"><span class="ct"><i class="fas fa-qrcode"></i>Pointage rapide</span></div>
+          <div class="cb text-center">
+            <div class="scan-zone" onclick="sp('scanner',document.querySelectorAll('.sl')[3])">
+              <i class="fas fa-qrcode scan-icon anim"></i>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.35rem;">Scanner un QR Code</div>
+              <div style="font-size:.76rem;color:var(--tm);">Cliquez pour pointer votre présence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card h-100">
+          <div class="ch"><span class="ct"><i class="fas fa-clock"></i>Prochaines séances</span></div>
+          <div id="prochaines-list"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct"><i class="fas fa-chart-bar"></i>Mon taux de présence par module</span><button class="btn bo bsm" onclick="sp('stats',document.querySelectorAll('.sl')[6])">Voir détails</button></div>
+      <div class="cb" id="modules-taux"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ PROFIL ══ -->
+  <div class="page" id="page-profil">
+    <div class="ph"><div><h2 class="pt"><i class="fas fa-user-circle" style="color:var(--p);font-size:1.1rem;margin-right:9px;"></i>Mon Profil</h2></div></div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="cb">
+            <div id="profil-avatar" style="width:80px;height:80px;background:linear-gradient(135deg,var(--ok),#059669);border-radius:20px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#fff;margin:0 auto 1rem;box-shadow:0 0 24px rgba(52,211,153,.3);">??</div>
+            <div id="profil-nom" style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;">—</div>
+            <div id="profil-email" style="font-size:.78rem;color:var(--tm);margin-top:.25rem;">—</div>
+            <div style="margin-top:.75rem;"><span class="badge ba"><i class="fas fa-user-graduate me-1"></i>Étudiant</span></div>
+            <hr style="border-color:var(--border);margin:1rem 0;">
+            <div style="font-size:.75rem;color:var(--tm);text-align:left;" id="profil-details"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="card mb-3">
+          <div class="ch"><span class="ct"><i class="fas fa-edit"></i>Modifier mes informations</span></div>
+          <div class="cb">
+            <div id="profil-msg"></div>
+            <div class="row g-3">
+              <div class="col-6"><label class="fl">Nom</label><input class="fc" id="p-nom"></div>
+              <div class="col-6"><label class="fl">Prénom</label><input class="fc" id="p-prenom"></div>
+              <div class="col-12"><label class="fl">Email</label><input class="fc" type="email" id="p-email" disabled style="opacity:.6;"></div>
+              <div class="col-6"><label class="fl">Téléphone</label><input class="fc" id="p-tel" placeholder="0666..."></div>
+              <div class="col-12 text-end"><button class="btn bp" onclick="saveProfile()"><i class="fas fa-save"></i> Enregistrer</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-lock"></i>Changer le mot de passe</span></div>
+          <div class="cb">
+            <div id="pass-msg"></div>
+            <div class="row g-3">
+              <div class="col-12"><label class="fl">Mot de passe actuel</label><input class="fc" type="password" id="p-cur" placeholder="••••••••"></div>
+              <div class="col-6"><label class="fl">Nouveau</label><input class="fc" type="password" id="p-new" placeholder="••••••••"></div>
+              <div class="col-6"><label class="fl">Confirmer</label><input class="fc" type="password" id="p-conf" placeholder="••••••••"></div>
+              <div class="col-12 text-end"><button class="btn bp" onclick="changePassword()"><i class="fas fa-lock"></i> Changer</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCANNER QR ══ -->
+  <div class="page" id="page-scanner">
+    <div class="ph"><div><h2 class="pt"><i class="fas fa-camera" style="color:var(--p);font-size:1.1rem;margin-right:9px;"></i>Scanner QR Code</h2><p class="psub">Scannez ou entrez le token manuellement</p></div></div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-camera"></i>Zone de scan</span></div>
+          <div class="cb">
+            <div id="scan-msg"></div>
+
+            <!-- Camera area -->
+            <div style="margin-bottom:1rem;">
+              <div id="camera-container" style="display:none;position:relative;border-radius:14px;overflow:hidden;background:#000;width:100%;aspect-ratio:4/3;margin-bottom:.75rem;box-shadow:0 0 0 2px var(--bstrong);">
+                <video id="camera-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+                <canvas id="camera-canvas" style="display:none;"></canvas>
+                <!-- Corner frame overlay -->
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                  <div style="position:relative;width:55%;aspect-ratio:1;">
+                    <div style="box-shadow:0 0 0 9999px rgba(0,0,0,.5);position:absolute;inset:0;border-radius:4px;"></div>
+                    <div style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:3px solid var(--p);border-left:3px solid var(--p);border-radius:4px 0 0 0;z-index:1;"></div>
+                    <div style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:3px solid var(--p);border-right:3px solid var(--p);border-radius:0 4px 0 0;z-index:1;"></div>
+                    <div style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:3px solid var(--p);border-left:3px solid var(--p);border-radius:0 0 0 4px;z-index:1;"></div>
+                    <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:3px solid var(--p);border-right:3px solid var(--p);border-radius:0 0 4px 0;z-index:1;"></div>
+                    <div id="scan-line" style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--p),transparent);animation:scanline 1.5s linear infinite;z-index:2;"></div>
+                  </div>
+                </div>
+                <div id="camera-status" style="position:absolute;bottom:.6rem;left:0;right:0;text-align:center;font-size:.72rem;color:rgba(255,255,255,.8);background:rgba(0,0,0,.35);padding:.3rem;pointer-events:none;">Pointez vers un QR Code...</div>
+              </div>
+
+              <!-- Camera button -->
+              <button class="btn bp w-100 mb-2" id="btn-camera" onclick="toggleCamera()" style="padding:.7rem 1rem;font-size:.88rem;">
+                <i class="fas fa-camera"></i> <span id="btn-camera-label">Activer la caméra</span>
+              </button>
+              <div id="camera-permission-hint" style="display:none;font-size:.74rem;color:var(--warn);text-align:center;padding:.4rem .5rem;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:8px;margin-bottom:.5rem;">
+                <i class="fas fa-lock me-1"></i>La caméra requiert HTTPS ou localhost. <span id="hint-detail"></span>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;color:var(--tm);font-size:.75rem;">
+              <div style="flex:1;height:1px;background:var(--border);"></div>ou entrez manuellement<div style="flex:1;height:1px;background:var(--border);"></div>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <label class="fl">Token QR Code</label>
+              <div style="display:flex;gap:.5rem;">
+                <input class="fc" id="scan-token" placeholder="Collez le token ici..." style="font-family:monospace;letter-spacing:.05em;" onkeydown="if(event.key==='Enter')doScan()">
+                <button class="btn bp" onclick="doScan()" style="white-space:nowrap;flex-shrink:0;"><i class="fas fa-check"></i> Valider</button>
+              </div>
+            </div>
+
+            <div class="scan-zone" id="scan-zone" onclick="doScan()" style="padding:1.5rem 1rem;">
+              <i class="fas fa-qrcode scan-icon anim" id="scan-icon"></i>
+              <div id="scan-text">
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.5rem;">Valider ma présence</div>
+                <div style="font-size:.78rem;color:var(--tm);">Entrez le token ci-dessus puis cliquez</div>
+              </div>
+            </div>
+            <div style="margin-top:1rem;">
+              <div class="alert alert-warning" style="font-size:.76rem;"><i class="fas fa-exclamation-circle me-2"></i>Assurez-vous d'être <strong>physiquement présent</strong> en salle. Le QR est valide 15 minutes seulement.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card mb-3">
+          <div class="ch"><span class="ct"><i class="fas fa-history"></i>Derniers scans</span></div>
+          <div id="recent-scans"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-info-circle"></i>Comment ça marche</span></div>
+          <div class="cb p-0">
+            <div style="padding:.7rem 1.1rem;border-bottom:1px solid var(--border);display:flex;gap:9px;"><div style="width:20px;height:20px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;color:#fff;">1</div><div style="font-size:.76rem;color:var(--ts);">L'enseignant affiche le QR au tableau</div></div>
+            <div style="padding:.7rem 1.1rem;border-bottom:1px solid var(--border);display:flex;gap:9px;"><div style="width:20px;height:20px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;color:#fff;">2</div><div style="font-size:.76rem;color:var(--ts);">Scannez avec la caméra ou collez le token</div></div>
+            <div style="padding:.7rem 1.1rem;display:flex;gap:9px;"><div style="width:20px;height:20px;background:var(--ok);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;color:#000;">✓</div><div style="font-size:.76rem;color:var(--ts);">Présence enregistrée automatiquement</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HISTORIQUE ══ -->
+  <div class="page" id="page-historique">
+    <div class="ph"><div><h2 class="pt"><i class="fas fa-history" style="color:var(--p);font-size:1.1rem;margin-right:9px;"></i>Historique des Présences</h2><p class="psub">Toutes mes séances ce semestre</p></div></div>
+    <div class="row g-3">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="tr table-responsive">
+            <table class="table table-hover mb-0">
+              <thead><tr><th>Module</th><th>Type</th><th>Date</th><th>Statut</th><th>Pointage</th></tr></thead>
+              <tbody id="historique-body"><tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-chart-pie"></i>Résumé</span></div>
+          <div class="cb text-center">
+            <div class="donut-wrap mb-3">
+              <svg class="donut-svg" width="140" height="140">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--el)" stroke-width="14"/>
+                <circle id="donut-arc" cx="70" cy="70" r="54" fill="none" stroke="url(#g1)" stroke-width="14" stroke-dasharray="0 339" stroke-linecap="round"/>
+                <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs>
+              </svg>
+              <div class="donut-label"><div class="donut-pct" id="donut-pct" style="color:var(--ok);">—</div><div class="donut-sub">présence</div></div>
+            </div>
+            <div id="donut-legend" style="display:flex;justify-content:center;gap:1.5rem;font-size:.76rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ JUSTIFICATIONS ══ -->
+  <div class="page" id="page-justifications">
+    <div class="ph"><div><h2 class="pt"><i class="fas fa-file-alt" style="color:var(--p);font-size:1.1rem;margin-right:9px;"></i>Mes Justifications</h2><p class="psub">Soumettre et suivre vos demandes</p></div><button class="btn bp" onclick="loadAbsences();om('m-just')"><i class="fas fa-plus"></i> Nouvelle justification</button></div>
+    <div class="row g-3">
+      <div class="col-md-8" id="justif-list"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="ch"><span class="ct"><i class="fas fa-chart-pie"></i>Bilan justifications</span></div>
+          <div class="cb" id="justif-bilan"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATS ══ -->
+  <div class="page" id="page-stats">
+    <div class="ph"><div><h2 class="pt"><i class="fas fa-chart-bar" style="color:var(--p);font-size:1.1rem;margin-right:9px;"></i>Mes Statistiques</h2><p class="psub">Analyse détaillée de ma présence</p></div></div>
+    <div class="row g-3 mb-3">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="cb">
+            <div class="donut-wrap mb-3">
+              <svg class="donut-svg" width="140" height="140">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--el)" stroke-width="14"/>
+                <circle id="stats-arc" cx="70" cy="70" r="54" fill="none" stroke="url(#g2)" stroke-width="14" stroke-dasharray="0 339" stroke-linecap="round"/>
+                <defs><linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs>
+              </svg>
+              <div class="donut-label"><div class="donut-pct" id="stats-pct" style="color:var(--ok);">—</div><div class="donut-sub">global</div></div>
+            </div>
+            <div id="stats-counts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;text-align:center;font-size:.74rem;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="card h-100">
+          <div class="ch"><span class="ct"><i class="fas fa-chart-bar"></i>Taux par module</span></div>
+          <div class="cb" id="stats-modules"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- mw -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="act" id="mnav-dashboard" onclick="sp('dashboard',this);mnavAct(this)"><i class="fas fa-th-large"></i>Accueil</button>
+  <button id="mnav-scanner" onclick="sp('scanner',this);mnavAct(this)"><i class="fas fa-camera"></i>Scanner</button>
+  <button id="mnav-historique" onclick="sp('historique',this);mnavAct(this)"><i class="fas fa-history"></i>Historique</button>
+  <button id="mnav-justifications" onclick="sp('justifications',this);mnavAct(this)"><i class="fas fa-file-alt"></i>Justifs</button>
+  <button id="mnav-profil" onclick="sp('profil',this);mnavAct(this)"><i class="fas fa-user-circle"></i>Profil</button>
+</nav>
+
+<!-- MODAL JUSTIFICATION -->
+<div class="modal fade" id="m-just" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fas fa-file-alt me-2" style="color:var(--p);"></i>Soumettre une Justification</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="just-msg"></div>
+        <div class="mb-3"><label class="fl">Séance concernée</label>
+          <select class="fs" id="just-seance"><option value="">Chargement des absences...</option></select>
+        </div>
+        <div class="mb-3"><label class="fl">Motif de l'absence</label>
+          <select class="fs" id="just-motif">
+            <option value="medical">Raison médicale</option>
+            <option value="familial">Raison familiale</option>
+            <option value="transport">Problème de transport</option>
+            <option value="universitaire">Activité universitaire</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="mb-3"><label class="fl">Description</label><textarea class="fc" id="just-desc" rows="3" placeholder="Décrivez brièvement la raison de votre absence..." style="resize:none;height:auto;"></textarea></div>
+        <div class="mb-3">
+          <label class="fl">Pièce jointe (optionnel)</label>
+          <div style="background:var(--el);border:1px dashed var(--border);border-radius:10px;padding:1.2rem;text-align:center;cursor:pointer;" onclick="document.getElementById('just-file').click()">
+            <i class="fas fa-cloud-upload-alt" style="color:var(--p);font-size:1.4rem;margin-bottom:.4rem;display:block;"></i>
+            <div style="font-size:.78rem;color:var(--tm);" id="file-label">Glisser-déposer ou <span style="color:var(--pl);">parcourir</span></div>
+            <input type="file" id="just-file" style="display:none;" accept=".pdf,.jpg,.png" onchange="document.getElementById('file-label').textContent=this.files[0]?.name||'Aucun fichier'">
+          </div>
+        </div>
+        <div class="alert alert-warning" style="font-size:.76rem;"><i class="fas fa-exclamation-circle me-2"></i>La justification sera transmise à l'enseignant du module pour validation.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn bo" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn bp" id="just-submit-btn" onclick="submitJustification()"><i class="fas fa-paper-plane"></i> Soumettre</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="/api.js"></script>
+<script>
+  // ── Auth guard ──────────────────────────────────────────────
+  const user = API.requireAuth('etudiant');
+  if (!user) throw new Error('Not authenticated');
+
+  // ── Init user info in navbar ────────────────────────────────
+  document.getElementById('user-info').innerHTML =
+    `<i class="fas fa-circle" style="font-size:.5rem;color:var(--ok);margin-right:4px;"></i>${user.prenom} ${user.nom} — ${user.niveau || 'L3'} ${user.groupes || ''}`;
+
+  // ── Page navigation ─────────────────────────────────────────
+  function sp(id, el) {
+    // Close sidebar on mobile when navigating
+    if (window.innerWidth < 768) {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('show');
+    }
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('act'));
+    document.querySelectorAll('.sl').forEach(l => l.classList.remove('act'));
+    document.getElementById('page-' + id).classList.add('act');
+    if (el?.classList?.contains('sl')) el.classList.add('act');
+    // Lazy load
+    if (id === 'historique')    loadHistorique();
+    if (id === 'justifications') loadJustifications();
+    if (id === 'stats')         loadStats();
+    if (id === 'profil')        loadProfil();
+    if (id === 'scanner')       loadRecentScans();
+    if (id !== 'scanner' && cameraActive) stopCamera();
+  }
+
+  function om(id) { new bootstrap.Modal(document.getElementById(id)).show(); }
+
+  // ── DASHBOARD ───────────────────────────────────────────────
+  async function loadDashboard() {
+    try {
+      const data = await API.get('/etudiant/dashboard');
+      const s = data.stats;
+
+      document.getElementById('dash-prenom').textContent = user.prenom;
+      document.getElementById('dash-sub').textContent =
+        `${user.niveau || 'L3'} Informatique · ${user.groupes || ''} — Semestre 1, 2024–2025`;
+
+      // Stats cards
+      const pct = s.taux_global || 0;
+      const color = pct >= 85 ? 'var(--ok)' : pct >= 75 ? 'var(--warn)' : 'var(--err)';
+      document.getElementById('dash-stats').innerHTML = `
+        <div class="sc"><div class="sl2">Taux global</div><div class="sv" style="color:${color};">${pct}<span style="font-size:.9rem;color:var(--tm)">%</span></div><div class="ssub" style="color:${color};">${pct>=85?'Très bien !':pct>=75?'Moyen':'Insuffisant'}</div><i class="fas fa-chart-line si"></i></div>
+        <div class="sc"><div class="sl2">Séances assistées</div><div class="sv">${s.presents||0}</div><div class="ssub">sur ${s.total_seances||0} séances</div><i class="fas fa-calendar-check si"></i></div>
+        <div class="sc"><div class="sl2">Absences</div><div class="sv" style="color:var(--warn);">${s.absents||0}</div><div class="ssub">ce semestre</div><i class="fas fa-calendar-times si" style="color:var(--warn);"></i></div>
+        <div class="sc"><div class="sl2">Justifications</div><div class="sv">${data.justif_stats?.acceptees||0}</div><div class="ssub">acceptées / ${(data.justif_stats?.en_attente||0)+(data.justif_stats?.acceptees||0)+(data.justif_stats?.refusees||0)} envoyées</div><i class="fas fa-file-alt si"></i></div>
+      `;
+
+      // Prochaines séances
+      const pr = data.prochaines;
+      if (pr.length === 0) {
+        document.getElementById('prochaines-list').innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--tm);font-size:.82rem;">Aucune séance à venir</div>';
+      } else {
+        document.getElementById('prochaines-list').innerHTML = pr.map(s => `
+          <div style="padding:.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:.83rem;color:var(--t);font-weight:500;">${s.module}</div><div style="font-size:.72rem;color:var(--tm);">${s.type} — ${s.groupe} — ${fmtDate(s.date_seance)} à ${s.heure_debut?.slice(0,5)} — ${s.salle||'—'}</div></div>
+            <span class="badge bi">${fmtRelDate(s.date_seance)}</span>
+          </div>`).join('');
+      }
+
+      // Modules taux
+      const mt = data.modules_taux;
+      document.getElementById('modules-taux').innerHTML = mt.length
+        ? `<div class="row g-3">${mt.map(m => {
+            const t = m.taux||0;
+            const c = t>=85?'var(--ok)':t>=75?'var(--pl)':'var(--warn)';
+            const bg = t>=85?'linear-gradient(90deg,var(--ok),#10b981)':t>=75?'':'linear-gradient(90deg,var(--warn),#f59e0b)';
+            return `<div class="col-md-4"><div style="font-size:.78rem;color:var(--ts);margin-bottom:.4rem;">${m.module} <span style="color:${c};">${t}%</span></div><div class="pbw"><div class="pbf" style="width:${t}%;${bg?'background:'+bg:''}"></div></div></div>`;
+          }).join('')}</div>`
+        : '<div style="color:var(--tm);font-size:.82rem;">Aucun module trouvé.</div>';
+
+    } catch (e) { console.error(e); }
+  }
+
+  // ── SCANNER ─────────────────────────────────────────────────
+  async function loadRecentScans() {
+    try {
+      const data = await API.get('/etudiant/historique');
+      const recents = data.filter(h => h.statut === 'present').slice(0, 4);
+      document.getElementById('recent-scans').innerHTML = recents.length
+        ? recents.map(r => `
+            <div style="padding:.8rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;">
+              <div style="width:28px;height:28px;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.4);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ok);font-size:.7rem;flex-shrink:0;"><i class="fas fa-check"></i></div>
+              <div><div style="font-size:.8rem;color:var(--t);">${r.module} — ${r.groupe}</div><div style="font-size:.7rem;color:var(--tm);">${fmtDate(r.date_seance)} — ${r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : r.heure_debut?.slice(0,5)}</div></div>
+            </div>`).join('')
+        : '<div style="padding:1.5rem;text-align:center;color:var(--tm);font-size:.82rem;">Aucun scan récent</div>';
+    } catch (e) {}
+  }
+
+  // ── SOUND EFFECTS ────────────────────────────────────────────
+  const _ac = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playBeep(freq = 880, duration = 0.12, type = 'square', vol = 0.3) {
+    try {
+      const osc  = _ac.createOscillator();
+      const gain = _ac.createGain();
+      osc.connect(gain);
+      gain.connect(_ac.destination);
+      osc.type      = type;
+      osc.frequency.setValueAtTime(freq, _ac.currentTime);
+      gain.gain.setValueAtTime(vol, _ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, _ac.currentTime + duration);
+      osc.start(_ac.currentTime);
+      osc.stop(_ac.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function soundScan() {
+    playBeep(1200, 0.08, 'square', 0.25);
+    setTimeout(() => playBeep(1600, 0.1, 'square', 0.2), 90);
+  }
+
+  function soundSuccess() {
+    playBeep(600,  0.1, 'sine', 0.3);
+    setTimeout(() => playBeep(800,  0.1, 'sine', 0.3), 110);
+    setTimeout(() => playBeep(1000, 0.18, 'sine', 0.35), 220);
+  }
+
+  function soundError() {
+    playBeep(300, 0.18, 'sawtooth', 0.3);
+    setTimeout(() => playBeep(200, 0.22, 'sawtooth', 0.25), 200);
+  }
+
+  document.addEventListener('click', () => {
+    if (_ac.state === 'suspended') _ac.resume();
+  }, { once: true });
+
+  // ── CAMERA SCANNER ───────────────────────────────────────────
+  let cameraStream = null;
+  let cameraActive = false;
+  let scanAnimFrame = null;
+
+  async function toggleCamera() {
+    if (cameraActive) { stopCamera(); return; }
+    await startCamera();
+  }
+
+  async function startCamera() {
+    const btn       = document.getElementById('btn-camera');
+    const label     = document.getElementById('btn-camera-label');
+    const container = document.getElementById('camera-container');
+    const video     = document.getElementById('camera-video');
+    const status    = document.getElementById('camera-status');
+    const hint      = document.getElementById('camera-permission-hint');
+    const msg       = document.getElementById('scan-msg');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      const isHttp = location.protocol === 'http:' && location.hostname !== 'localhost';
+      hint.style.display = 'block';
+      document.getElementById('hint-detail').textContent = isHttp
+        ? 'Accédez via HTTPS pour utiliser la caméra.' : 'Votre navigateur ne supporte pas la caméra.';
+      msg.innerHTML = `<div class="alert alert-danger mb-3">
+        <strong><i class="fas fa-exclamation-triangle me-2"></i>Caméra non disponible</strong><br>
+        <span style="font-size:.8rem;">${isHttp ? 'La caméra nécessite une connexion HTTPS. Utilisez le champ token ci-dessous.' : 'Votre navigateur ne supporte pas l\'API caméra. Utilisez le champ token.'}</span>
+      </div>`;
+      return;
+    }
+
+    hint.style.display = 'none';
+    label.textContent = 'Démarrage...';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Démarrage...</span>';
+
+    try {
+      const attempts = [
+        { video: { facingMode: { exact: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } } },
+        { video: { facingMode: 'environment' } },
+        { video: { facingMode: 'user' } },
+        { video: true }
+      ];
+
+      let stream = null;
+      for (const constraints of attempts) {
+        try { stream = await navigator.mediaDevices.getUserMedia(constraints); break; }
+        catch (e) { /* try next */ }
+      }
+      if (!stream) throw Object.assign(new Error('Impossible d\'accéder à la caméra.'), { name: 'NotFoundError' });
+
+      cameraStream = stream;
+      video.srcObject = stream;
+
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = resolve;
+        video.onerror = reject;
+        setTimeout(resolve, 3000);
+      });
+
+      try { await video.play(); } catch(e) { }
+
+      container.style.display = 'block';
+      btn.innerHTML = '<i class="fas fa-stop-circle"></i> <span>Arrêter la caméra</span>';
+      btn.disabled = false;
+      btn.className = 'btn w-100 mb-2';
+      btn.style.cssText = 'background:rgba(248,113,113,.15);color:var(--err);border:1px solid rgba(248,113,113,.3);padding:.7rem 1rem;font-size:.88rem;';
+      cameraActive = true;
+      msg.innerHTML = '';
+      status.textContent = 'Pointez vers un QR Code...';
+      status.style.color = 'rgba(255,255,255,.8)';
+
+      scanQRFromCamera();
+
+    } catch (e) {
+      btn.innerHTML = '<i class="fas fa-camera"></i> <span>Activer la caméra</span>';
+      btn.disabled = false;
+      btn.className = 'btn bp w-100 mb-2';
+      btn.style.cssText = 'padding:.7rem 1rem;font-size:.88rem;';
+      let errMsg = e.message;
+      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError')
+        errMsg = 'Permission refusée. Autorisez l\'accès à la caméra dans les paramètres de votre navigateur, puis rechargez la page.';
+      else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError')
+        errMsg = 'Aucune caméra détectée. Utilisez le champ token ci-dessous.';
+      else if (e.name === 'NotReadableError')
+        errMsg = 'La caméra est utilisée par une autre application. Fermez-la puis réessayez.';
+      else if (e.name === 'OverconstrainedError')
+        errMsg = 'Contraintes caméra non satisfaites. Réessayez.';
+      msg.innerHTML = `<div class="alert alert-danger mb-3"><i class="fas fa-exclamation-circle me-2"></i>${errMsg}</div>`;
+    }
+  }
+
+  function stopCamera() {
+    if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+    if (scanAnimFrame) { cancelAnimationFrame(scanAnimFrame); scanAnimFrame = null; }
+    cameraActive = false;
+    const container = document.getElementById('camera-container');
+    const btn       = document.getElementById('btn-camera');
+    container.style.display = 'none';
+    btn.innerHTML    = '<i class="fas fa-camera"></i> <span>Activer la caméra</span>';
+    btn.disabled     = false;
+    btn.className    = 'btn bp w-100 mb-2';
+    btn.style.cssText = 'padding:.7rem 1rem;font-size:.88rem;';
+  }
+
+  function scanQRFromCamera() {
+    const video  = document.getElementById('camera-video');
+    const canvas = document.getElementById('camera-canvas');
+    const status = document.getElementById('camera-status');
+    const ctx    = canvas.getContext('2d');
+    let lastTick = 0;
+
+    function tick(timestamp) {
+      if (!cameraActive) return;
+      if (timestamp - lastTick < 100) { scanAnimFrame = requestAnimationFrame(tick); return; }
+      lastTick = timestamp;
+
+      if (video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+        canvas.width  = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        try {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'attemptBoth'
+          });
+          if (code && code.data && code.data.trim()) {
+            status.textContent = '✓ QR Code détecté !';
+            status.style.color = 'var(--ok)';
+            soundScan();
+            stopCamera();
+            document.getElementById('scan-token').value = code.data.trim();
+            doScan();
+            return;
+          }
+        } catch(e) { }
+      }
+      scanAnimFrame = requestAnimationFrame(tick);
+    }
+    scanAnimFrame = requestAnimationFrame(tick);
+  }
+
+  async function doScan() {
+    const token = document.getElementById('scan-token').value.trim();
+    const msg   = document.getElementById('scan-msg');
+    const zone  = document.getElementById('scan-zone');
+    const icon  = document.getElementById('scan-icon');
+    const text  = document.getElementById('scan-text');
+    msg.innerHTML = '';
+
+    if (!token) {
+      msg.innerHTML = '<div class="alert alert-danger mb-3">⚠ Entrez le token QR fourni par l\'enseignant.</div>'; return;
+    }
+    try {
+      const res = await API.post('/etudiant/scan', { token });
+      soundSuccess();
+      zone.className = 'scan-zone scan-success';
+      icon.className = 'fas fa-check scan-icon'; icon.style.color = 'var(--ok)'; icon.style.animation = 'none';
+      text.innerHTML = `<div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--ok);margin-bottom:.35rem;">✓ Présence enregistrée !</div>
+        <div style="font-size:.76rem;color:var(--ts);">${res.module} — ${res.groupe}</div>
+        <div style="font-size:.72rem;color:var(--tm);margin-top:.3rem;">${res.heure}</div>`;
+      document.getElementById('scan-token').value = '';
+      setTimeout(() => {
+        zone.className = 'scan-zone'; icon.className = 'fas fa-qrcode scan-icon anim';
+        icon.style.color = ''; icon.style.animation = '';
+        text.innerHTML = `<div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.5rem;">Valider ma présence</div><div style="font-size:.78rem;color:var(--tm);">Entrez le token ci-dessus puis cliquez</div>`;
+      }, 5000);
+    } catch (e) {
+      soundError();
+      msg.innerHTML = `<div class="alert alert-danger mb-3">⚠ ${e.message}</div>`;
+    }
+  }
+
+  // ── HISTORIQUE ──────────────────────────────────────────────
+  async function loadHistorique() {
+    try {
+      const data = await API.get('/etudiant/historique');
+      document.getElementById('historique-body').innerHTML = data.length
+        ? data.map(r => `
+          <tr>
+            <td style="color:var(--t);">${r.module}</td>
+            <td><span class="badge ${r.seance_type==='TP'?'bw':'bi'}">${r.seance_type}</span></td>
+            <td style="color:var(--tm);font-size:.76rem;">${fmtDate(r.date_seance)}</td>
+            <td>${r.statut==='present'?'<span class="badge ba">✓ Présent</span>':r.statut==='justifie'?'<span class="badge bw">⚠ Justifié</span>':'<span class="badge ber">✗ Absent</span>'}</td>
+            <td style="font-size:.72rem;color:var(--tm);">${r.statut==='present'?`QR — ${r.scanned_at?new Date(r.scanned_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—'}`:r.statut==='justifie'?'Justificatif':'—'}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Aucune séance trouvée.</td></tr>';
+
+      const total    = data.length;
+      const presents = data.filter(r=>r.statut==='present').length;
+      const absents  = data.filter(r=>r.statut==='absent').length;
+      const justifies= data.filter(r=>r.statut==='justifie').length;
+      const pct = total ? Math.round(presents*100/total) : 0;
+      const circ = 2 * Math.PI * 54;
+      document.getElementById('donut-arc').setAttribute('stroke-dasharray', `${circ*pct/100} ${circ}`);
+      document.getElementById('donut-pct').textContent = pct + '%';
+      document.getElementById('donut-legend').innerHTML = `
+        <div><div style="color:var(--ok);font-weight:600;">${presents}</div><div style="color:var(--tm);">Présences</div></div>
+        <div><div style="color:var(--err);font-weight:600;">${absents}</div><div style="color:var(--tm);">Absences</div></div>
+        <div><div style="color:var(--warn);font-weight:600;">${justifies}</div><div style="color:var(--tm);">Justifiées</div></div>`;
+    } catch (e) { console.error(e); }
+  }
+
+  // ── JUSTIFICATIONS ──────────────────────────────────────────
+  async function loadJustifications() {
+    try {
+      const data = await API.get('/etudiant/justifications');
+      const colors = { acceptee:'var(--ok)', en_attente:'var(--warn)', refusee:'var(--err)' };
+      const labels = { acceptee:'Acceptée ✓', en_attente:'En attente', refusee:'Refusée ✗' };
+      const badges = { acceptee:'ba', en_attente:'bw', refusee:'ber' };
+
+      document.getElementById('justif-list').innerHTML = data.length
+        ? data.map(j => `
+          <div class="card mb-3" style="border-left:3px solid ${colors[j.statut]};">
+            <div class="cb">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;">
+                <div><div style="font-size:.85rem;color:var(--t);font-weight:500;">${j.module} — ${fmtDate(j.seance_date||j.date_seance)}</div><div style="font-size:.72rem;color:var(--tm);">${j.seance_type}</div></div>
+                <span class="badge ${badges[j.statut]}">${labels[j.statut]}</span>
+              </div>
+              <div style="font-size:.8rem;color:var(--ts);background:var(--el);padding:.6rem;border-radius:8px;border:1px solid var(--border);">"${j.description||j.motif}"</div>
+              <div style="font-size:.72rem;color:var(--tm);margin-top:.5rem;">
+                ${j.fichier_url?`<i class="fas fa-paperclip" style="color:var(--p);"></i> <a href="${j.fichier_url}" target="_blank">Pièce jointe</a> · `:''}
+                ${j.statut==='acceptee'?`<span style="color:var(--ok);">Acceptée le ${fmtDate(j.traite_at)}</span>`:
+                  j.statut==='refusee'?`<span style="color:var(--err);">Refusée — ${j.commentaire||'Justificatif insuffisant'}</span>`:
+                  '<i class="fas fa-clock" style="color:var(--warn);"></i> En attente de traitement...'}
+              </div>
+            </div>
+          </div>`).join('')
+        : '<div class="card"><div class="cb text-center" style="color:var(--tm);padding:2rem;">Aucune justification soumise.</div></div>';
+
+      const acc = data.filter(j=>j.statut==='acceptee').length;
+      const att = data.filter(j=>j.statut==='en_attente').length;
+      const ref = data.filter(j=>j.statut==='refusee').length;
+      const tot = data.length || 1;
+      document.getElementById('justif-bilan').innerHTML = `
+        <div style="margin-bottom:.85rem;"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;"><span>Acceptées</span><span style="color:var(--ok);">${acc}</span></div><div class="pbw"><div class="pbf" style="width:${acc*100/tot}%;background:linear-gradient(90deg,var(--ok),#10b981);"></div></div></div>
+        <div style="margin-bottom:.85rem;"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;"><span>En attente</span><span style="color:var(--warn);">${att}</span></div><div class="pbw"><div class="pbf" style="width:${att*100/tot}%;background:linear-gradient(90deg,var(--warn),#f59e0b);"></div></div></div>
+        <div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;"><span>Refusées</span><span style="color:var(--err);">${ref}</span></div><div class="pbw"><div class="pbf" style="width:${ref*100/tot}%;background:linear-gradient(90deg,var(--err),#ef4444);"></div></div></div>
+        <button class="btn bp w-100" onclick="loadAbsences();om('m-just')"><i class="fas fa-plus"></i> Soumettre une justification</button>`;
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadAbsences() {
+    const sel = document.getElementById('just-seance');
+    sel.innerHTML = '<option value="">Chargement...</option>';
+    try {
+      const data = await API.get('/etudiant/absences');
+      sel.innerHTML = data.length
+        ? data.map(a => `<option value="${a.seance_id}">${a.module} — ${fmtDate(a.date_seance)} — ${a.seance_type}</option>`).join('')
+        : '<option value="">Aucune absence non justifiée</option>';
+    } catch { sel.innerHTML = '<option value="">Erreur de chargement</option>'; }
+  }
+
+  async function submitJustification() {
+    const seance_id  = document.getElementById('just-seance').value;
+    const motif      = document.getElementById('just-motif').value;
+    const description= document.getElementById('just-desc').value.trim();
+    const fileInput  = document.getElementById('just-file');
+    const msg        = document.getElementById('just-msg');
+    const btn        = document.getElementById('just-submit-btn');
+    msg.innerHTML = '';
+
+    if (!seance_id) { msg.innerHTML='<div class="alert alert-danger mb-2">Sélectionnez une séance.</div>'; return; }
+
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
+    try {
+      let fichier_url = null;
+      if (fileInput.files[0]) {
+        const form = new FormData(); form.append('fichier', fileInput.files[0]);
+        const up = await API.upload('/upload', form);
+        fichier_url = up.url;
+      }
+      await API.post('/etudiant/justifications', { seance_id: parseInt(seance_id), motif, description, fichier_url });
+      bootstrap.Modal.getInstance(document.getElementById('m-just')).hide();
+      loadJustifications();
+    } catch (e) {
+      msg.innerHTML = `<div class="alert alert-danger mb-2">⚠ ${e.message}</div>`;
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre';
+    }
+  }
+
+  // ── STATS ───────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const data = await API.get('/etudiant/dashboard');
+      const s = data.stats;
+      const pct = s.taux_global || 0;
+      const circ = 2 * Math.PI * 54;
+      document.getElementById('stats-arc').setAttribute('stroke-dasharray', `${circ*pct/100} ${circ}`);
+      document.getElementById('stats-pct').textContent = pct + '%';
+      document.getElementById('stats-counts').innerHTML = `
+        <div style="background:rgba(52,211,153,.1);border-radius:8px;padding:.5rem;"><div style="color:var(--ok);font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;">${s.presents||0}</div><div style="color:var(--tm);">Présences</div></div>
+        <div style="background:rgba(248,113,113,.1);border-radius:8px;padding:.5rem;"><div style="color:var(--err);font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;">${s.absents||0}</div><div style="color:var(--tm);">Absences</div></div>
+        <div style="background:rgba(251,191,36,.1);border-radius:8px;padding:.5rem;"><div style="color:var(--warn);font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;">${s.justifies||0}</div><div style="color:var(--tm);">Justifiées</div></div>`;
+
+      const mt = data.modules_taux;
+      document.getElementById('stats-modules').innerHTML = mt.length
+        ? `<div style="display:flex;flex-direction:column;gap:.75rem;">${mt.sort((a,b)=>b.taux-a.taux).map(m => {
+            const t = m.taux||0;
+            const c = t>=85?'var(--ok)':t>=75?'var(--pl)':'var(--warn)';
+            const bg = t>=85?'linear-gradient(90deg,var(--ok),#10b981)':t<75?'linear-gradient(90deg,var(--warn),#f59e0b)':'';
+            return `<div><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;"><span>${m.module}</span><span style="color:${c};">${t}%</span></div><div class="pbw"><div class="pbf" style="width:${t}%;${bg?'background:'+bg:''}"></div></div></div>`;
+          }).join('')}</div>`
+        : '<div style="color:var(--tm);font-size:.82rem;">Aucune donnée.</div>';
+    } catch (e) { console.error(e); }
+  }
+
+  // ── PROFIL ──────────────────────────────────────────────────
+  async function loadProfil() {
+    try {
+      const data = await API.get('/auth/me');
+      const initials = (data.nom?.[0]||'')+(data.prenom?.[0]||'');
+      document.getElementById('profil-avatar').textContent = initials.toUpperCase();
+      document.getElementById('profil-nom').textContent   = `${data.prenom} ${data.nom}`;
+      document.getElementById('profil-email').textContent = data.email;
+      document.getElementById('p-nom').value   = data.nom    || '';
+      document.getElementById('p-prenom').value= data.prenom || '';
+      document.getElementById('p-email').value = data.email  || '';
+      document.getElementById('p-tel').value   = data.telephone || '';
+      document.getElementById('profil-details').innerHTML = `
+        <div style="margin-bottom:.35rem;"><i class="fas fa-layer-group" style="color:var(--p);width:16px;"></i> Niveau : ${user.niveau||'L3'}</div>
+        <div style="margin-bottom:.35rem;"><i class="fas fa-users" style="color:var(--p);width:16px;"></i> Groupes : ${user.groupes||'—'}</div>
+        <div><i class="fas fa-id-card" style="color:var(--p);width:16px;"></i> Matricule : <code>${user.matricule||'—'}</code></div>`;
+    } catch (e) { console.error(e); }
+  }
+
+  async function saveProfile() {
+    const msg = document.getElementById('profil-msg');
+    try {
+      await API.put('/auth/profile', {
+        nom:       document.getElementById('p-nom').value,
+        prenom:    document.getElementById('p-prenom').value,
+        telephone: document.getElementById('p-tel').value
+      });
+      msg.innerHTML = '<div class="alert alert-success mb-3">✓ Profil mis à jour.</div>';
+      setTimeout(() => msg.innerHTML = '', 3000);
+    } catch (e) {
+      msg.innerHTML = `<div class="alert alert-danger mb-3">⚠ ${e.message}</div>`;
+    }
+  }
+
+  async function changePassword() {
+    const msg = document.getElementById('pass-msg');
+    const cur  = document.getElementById('p-cur').value;
+    const nw   = document.getElementById('p-new').value;
+    const conf = document.getElementById('p-conf').value;
+    if (nw !== conf) { msg.innerHTML='<div class="alert alert-danger mb-3">⚠ Les mots de passe ne correspondent pas.</div>'; return; }
+    try {
+      await API.put('/auth/password', { current_password: cur, new_password: nw });
+      msg.innerHTML = '<div class="alert alert-success mb-3">✓ Mot de passe modifié.</div>';
+      document.getElementById('p-cur').value = document.getElementById('p-new').value = document.getElementById('p-conf').value = '';
+      setTimeout(() => msg.innerHTML = '', 3000);
+    } catch (e) {
+      msg.innerHTML = `<div class="alert alert-danger mb-3">⚠ ${e.message}</div>`;
+    }
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  }
+  function fmtRelDate(d) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const date  = new Date(d); date.setHours(0,0,0,0);
+    const diff  = Math.round((date-today)/(1000*60*60*24));
+    if (diff === 0) return 'Aujourd\'hui';
+    if (diff === 1) return 'Demain';
+    return fmtDate(d);
+  }
+
+  // ── SIDEBAR TOGGLE (mobile) ──────────────────────────────────
+  function toggleSidebar() {
+    const sidebar  = document.querySelector('.sidebar');
+    const overlay  = document.getElementById('sidebar-overlay');
+    const isOpen   = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    overlay.classList.toggle('show', !isOpen);
+  }
+
+  // ── MOBILE NAV ACTIVE STATE ──────────────────────────────────
+  function mnavAct(el) {
+    document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('act'));
+    el.classList.add('act');
+  }
+
+  // ── Boot ────────────────────────────────────────────────────
+  loadDashboard();
+</script>
+</body>
+</html>

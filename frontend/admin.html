@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UniPresence | Administration</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0c0b14;--bg2:#100e1c;--card:#13111f;--elevated:#1a1730;--border:rgba(139,92,246,.16);--border-strong:rgba(139,92,246,.36);--p:#8b5cf6;--pl:#a78bfa;--pd:#6d28d9;--pglow:rgba(139,92,246,.22);--ps:rgba(139,92,246,.08);--t:#f1eeff;--ts:#a89ec4;--tm:#5c5478;--ok:#34d399;--warn:#fbbf24;--err:#f87171;--info:#38bdf8;--sidebar:220px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+    /* ── DESKTOP LAYOUT ── */
+    body{background:var(--bg);color:var(--t);font-family:'Inter',sans-serif;display:flex;height:100vh;overflow:hidden;}
+
+    .sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;flex-shrink:0;z-index:100;transition:transform .28s cubic-bezier(.4,0,.2,1);}
+    .sb-logo{display:flex;align-items:center;gap:10px;padding:1.25rem 1.2rem;border-bottom:1px solid var(--border);text-decoration:none;}
+    .sb-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--p),var(--pd));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;box-shadow:0 0 16px var(--pglow);flex-shrink:0;}
+    .sb-logo-text{font-family:'Inter',sans-serif;font-weight:800;font-size:1.05rem;color:var(--t);}
+    .sb-nav{flex:1;overflow-y:auto;padding:.75rem 0;}
+    .sb-section{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tm);padding:.5rem 1.2rem .3rem;}
+    .sl{display:flex;align-items:center;gap:9px;padding:.55rem 1.2rem;margin:1px .5rem;border-radius:9px;cursor:pointer;color:var(--ts);font-size:.82rem;font-weight:500;transition:all .18s;border:none;background:none;width:calc(100% - 1rem);text-align:left;}
+    .sl i{width:16px;text-align:center;font-size:.8rem;}
+    .sl:hover{background:var(--ps);color:var(--t);}
+    .sl.act{background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(109,40,217,.12));color:var(--pl);border:1px solid rgba(139,92,246,.2);}
+    .sb-footer{padding:1rem 1.2rem;border-top:1px solid var(--border);}
+    .sb-user{display:flex;align-items:center;gap:9px;margin-bottom:.75rem;}
+    .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0;}
+    .sb-user-info{flex:1;min-width:0;}
+    .sb-user-name{font-size:.78rem;color:var(--t);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sb-user-role{font-size:.66rem;color:var(--tm);}
+    .btn-logout{width:100%;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#fca5a5;border-radius:8px;padding:.42rem;font-size:.76rem;cursor:pointer;transition:all .2s;}
+    .btn-logout:hover{background:rgba(248,113,113,.15);}
+
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+    .topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;flex-shrink:0;}
+    .topbar-title{font-family:'Inter',sans-serif;font-weight:700;font-size:1rem;color:var(--t);}
+    .topbar-right{display:flex;align-items:center;gap:.75rem;}
+    .content{flex:1;overflow-y:auto;padding:1.5rem;}
+    .page{display:none;}.page.act{display:block;}
+    .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;}
+    .pt{font-family:'Inter',sans-serif;font-weight:700;font-size:1.15rem;color:var(--t);}
+    .psub{font-size:.78rem;color:var(--tm);margin-top:2px;}
+
+    /* CARDS */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+
+    /* STAT CARDS */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.85rem;margin-bottom:1.25rem;}
+    .sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;position:relative;overflow:hidden;}
+    .sl2{font-size:.7rem;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem;}
+    .sv{font-size:1.6rem;font-weight:700;font-family:'Inter',sans-serif;color:var(--t);line-height:1;}
+    .si{position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:1.6rem;color:var(--border-strong);}
+
+    /* TABLE */
+    .table{color:var(--t);margin:0;}
+    .table thead th{background:var(--elevated);color:var(--ts);font-size:.73rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-color:var(--border);padding:.7rem 1rem;white-space:nowrap;}
+    .table tbody td{border-color:var(--border);padding:.7rem 1rem;vertical-align:middle;font-size:.82rem;}
+    .table tbody tr{background:var(--card);}
+    .table tbody tr:last-child td{border-bottom:none;}
+    .table-hover tbody tr:hover td{background:var(--ps);}
+    .table>:not(caption)>*>*{background-color:transparent;color:var(--t);border-color:var(--border);}
+
+    /* BADGES */
+    .badge{font-size:.68rem;font-weight:600;padding:.28rem .6rem;border-radius:6px;}
+    .ba{background:rgba(52,211,153,.12);color:#6ee7b7;border:1px solid rgba(52,211,153,.2);}
+    .ber{background:rgba(248,113,113,.12);color:#fca5a5;border:1px solid rgba(248,113,113,.2);}
+    .bw{background:rgba(251,191,36,.12);color:#fcd34d;border:1px solid rgba(251,191,36,.2);}
+    .bi{background:rgba(56,189,248,.12);color:#7dd3fc;border:1px solid rgba(56,189,248,.2);}
+    .bp2{background:var(--ps);color:var(--pl);border:1px solid rgba(139,92,246,.2);}
+    .bm{background:var(--elevated);color:var(--tm);border:1px solid var(--border);}
+
+    /* BUTTONS */
+    .btn{font-size:.8rem;border-radius:8px;padding:.42rem .85rem;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer;border:none;transition:all .2s;}
+    .bp{background:linear-gradient(135deg,var(--p),var(--pd));color:#fff;box-shadow:0 2px 12px rgba(109,40,217,.3);}
+    .bp:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(109,40,217,.45);color:#fff;}
+    .bo{background:transparent;border:1px solid var(--border);color:var(--ts);}
+    .bo:hover{border-color:var(--border-strong);color:var(--t);}
+    .bd{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#fca5a5;}
+    .bd:hover{background:rgba(248,113,113,.18);color:#fca5a5;}
+    .bsuc{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);color:#6ee7b7;}
+    .bsuc:hover{background:rgba(52,211,153,.2);color:#6ee7b7;}
+    .bsm{padding:.28rem .55rem;font-size:.74rem;}
+
+    /* FILTER BAR */
+    .filter-bar{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;}
+    .fc{background:var(--elevated);border:1px solid var(--border);color:var(--t);border-radius:9px;padding:.48rem .8rem;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;transition:border-color .2s;width:100%;}
+    .fc:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(139,92,246,.12);color:var(--t);}
+    .fc::placeholder{color:var(--tm);}
+    .fs{background:var(--elevated);border:1px solid var(--border);color:var(--t);border-radius:9px;padding:.48rem .8rem;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;width:100%;}
+    .fs:focus{border-color:var(--p);}
+    .fs option{background:var(--elevated);}
+    .fl{font-size:.75rem;font-weight:600;color:var(--ts);margin-bottom:.3rem;display:block;}
+
+    /* ROLE TAGS */
+    .ur-admin{background:rgba(139,92,246,.15);color:var(--pl);border-radius:5px;font-size:.7rem;padding:.22rem .55rem;font-weight:600;}
+    .ur-prof{background:rgba(56,189,248,.12);color:#7dd3fc;border-radius:5px;font-size:.7rem;padding:.22rem .55rem;font-weight:600;}
+    .ur-stud{background:rgba(52,211,153,.12);color:#6ee7b7;border-radius:5px;font-size:.7rem;padding:.22rem .55rem;font-weight:600;}
+
+    /* LOADING */
+    .loading{display:flex;align-items:center;gap:.6rem;padding:2rem;color:var(--tm);font-size:.85rem;justify-content:center;}
+
+    /* MODAL */
+    .modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;}
+    .modal-header{border-bottom:1px solid var(--border);padding:1.1rem 1.4rem;}
+    .modal-title{font-family:'Inter',sans-serif;font-weight:700;font-size:.95rem;color:var(--t);}
+    .modal-body{padding:1.4rem;}
+    .modal-footer{border-top:1px solid var(--border);padding:.9rem 1.4rem;}
+    .btn-close{filter:invert(1) opacity(.5);}
+    .btn-close:hover{filter:invert(1) opacity(.9);}
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(139,92,246,.25);border-radius:4px;}
+
+    /* ── HAMBURGER ── */
+    .hamburger{display:none;background:none;border:none;color:var(--ts);font-size:1.2rem;cursor:pointer;padding:.4rem .5rem;border-radius:8px;transition:all .2s;flex-shrink:0;}
+    .hamburger:hover{background:var(--ps);color:var(--t);}
+
+    /* ── SIDEBAR OVERLAY ── */
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;backdrop-filter:blur(2px);}
+    .sidebar-overlay.show{display:block;}
+
+    /* ── MOBILE BOTTOM NAV ── */
+    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(16,14,28,.97);border-top:1px solid var(--border);backdrop-filter:blur(20px);z-index:200;padding:.4rem 0 calc(.4rem + env(safe-area-inset-bottom));}
+    .mobile-nav button{flex:1;background:none;border:none;color:var(--tm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:.45rem .2rem;font-size:.55rem;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:color .2s;}
+    .mobile-nav button i{font-size:1rem;}
+    .mobile-nav button.act{color:var(--pl);}
+
+    /* ── ALERT ── */
+    .alert{border-radius:10px;font-size:.82rem;padding:.75rem 1rem;}
+    .alert-success{background:rgba(52,211,153,.1);color:#6ee7b7;border-left:3px solid var(--ok);border:none;border-left:3px solid var(--ok);}
+    .alert-danger{background:rgba(248,113,113,.1);color:#fca5a5;border:none;border-left:3px solid var(--err);}
+    .alert-warning{background:rgba(251,191,36,.1);color:#fde68a;border:none;border-left:3px solid var(--warn);}
+    .alert-info{background:rgba(56,189,248,.08);color:#7dd3fc;border:none;border-left:3px solid var(--info);}
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 767px) {
+      body{display:block;height:auto;overflow-x:hidden;overflow-y:auto;}
+      .sidebar{position:fixed;left:0;top:0;bottom:0;height:100vh;transform:translateX(-100%);z-index:1001;width:260px;box-shadow:4px 0 30px rgba(0,0,0,.5);}
+      .sidebar.open{transform:translateX(0);}
+      .main{display:flex;flex-direction:column;min-height:100vh;}
+      .topbar{position:sticky;top:0;z-index:100;}
+      .content{padding:1rem .9rem 5.5rem;overflow-y:visible;flex:1;}
+      .hamburger{display:flex;}
+      .mobile-nav{display:flex;}
+      .topbar-right .btn{font-size:.75rem;padding:.38rem .7rem;}
+      /* grid */
+      .grid2{grid-template-columns:1fr!important;}
+      .stats-grid{grid-template-columns:repeat(2,1fr)!important;}
+      /* table responsive — hide cols */
+      .hide-mobile{display:none!important;}
+      /* ph */
+      .ph{flex-direction:column;align-items:stretch;}
+      .ph .btn{width:100%;justify-content:center;}
+      /* filter bar */
+      .filter-bar{gap:.4rem;}
+      .filter-bar .fc,.filter-bar .fs{max-width:100%!important;}
+      /* modal */
+      .modal-dialog{margin:.75rem!important;}
+    }
+    @media (min-width:768px){
+      .hamburger{display:none!important;}
+      .mobile-nav{display:none!important;}
+      .sidebar-overlay{display:none!important;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <a href="/" class="sb-logo">
+    <div class="sb-logo-icon"><i class="fas fa-qrcode"></i></div>
+    <span class="sb-logo-text">UniPresence</span>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <button class="sl act" onclick="sp('dashboard',this)"><i class="fas fa-chart-pie"></i> Tableau de bord</button>
+    <button class="sl" onclick="sp('users',this)"><i class="fas fa-users"></i> Utilisateurs</button>
+    <button class="sl" id="btn-pending" onclick="sp('pending',this)"><i class="fas fa-user-clock"></i> Approbations <span id="pending-badge" style="background:#f59e0b;color:#000;border-radius:20px;padding:1px 7px;font-size:.68rem;font-weight:700;margin-left:4px;display:none;">0</span></button>
+    <button class="sl" onclick="sp('etudiants',this)"><i class="fas fa-user-graduate"></i> Étudiants</button>
+    <button class="sl" onclick="sp('profs',this)"><i class="fas fa-chalkboard-teacher"></i> Professeurs</button>
+    <div class="sb-section" style="margin-top:.5rem;">Pédagogie</div>
+    <button class="sl" onclick="sp('modules',this)"><i class="fas fa-book"></i> Modules</button>
+    <button class="sl" onclick="sp('semestres',this)"><i class="fas fa-calendar-alt"></i> Semestres</button>
+    <button class="sl" onclick="sp('justifications',this)"><i class="fas fa-file-alt"></i> Justifications</button>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="av" style="background:var(--p);" id="user-avatar">A</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="user-info">Admin</div>
+        <div class="sb-user-role">Administrateur</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="API.logout()"><i class="fas fa-sign-out-alt me-1"></i> Déconnexion</button>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <div class="topbar-title" id="topbar-title">Tableau de bord</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn bp" onclick="om('m-user')"><i class="fas fa-user-plus"></i> <span class="hide-mobile-text">Ajouter</span> utilisateur</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page act" id="page-dashboard">
+      <div class="ph"><div><h2 class="pt">Tableau de bord</h2><p class="psub">Vue d'ensemble de la plateforme</p></div></div>
+      <div class="stats-grid" id="dash-stats"><div class="sc"><div class="sl2">Chargement...</div><div class="sv">—</div></div></div>
+      <div class="grid2">
+        <div class="card">
+          <div style="padding:.9rem 1.1rem;border-bottom:1px solid var(--border);"><div style="font-size:.78rem;font-weight:600;color:var(--ts);">TAUX PAR MODULE</div></div>
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead><tr><th>Module</th><th class="hide-mobile">Séances</th><th>Taux</th></tr></thead>
+              <tbody id="modules-stats-body"><tr><td colspan="3" class="text-center py-3" style="color:var(--tm);">Chargement...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div style="padding:.9rem 1.1rem;border-bottom:1px solid var(--border);"><div style="font-size:.78rem;font-weight:600;color:var(--ts);">DERNIERS UTILISATEURS</div></div>
+          <div id="recent-users"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING -->
+    <div class="page" id="page-pending">
+      <div class="ph">
+        <div><h2 class="pt">Approbations en attente</h2><p class="psub">Comptes attendant votre validation</p></div>
+        <button class="btn bp" onclick="loadPending()"><i class="fas fa-sync"></i> Actualiser</button>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Nom</th><th class="hide-mobile">Email</th><th>Rôle</th><th class="hide-mobile">Inscrit le</th><th>Action</th></tr></thead>
+            <tbody id="pending-body"><tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="ph">
+        <div><h2 class="pt">Utilisateurs</h2><p class="psub">Gestion de tous les comptes</p></div>
+        <button class="btn bp" onclick="om('m-user')"><i class="fas fa-user-plus"></i> Ajouter</button>
+      </div>
+      <div class="filter-bar">
+        <input class="fc" id="search-user" placeholder="🔍 Rechercher..." oninput="filterUsers()" style="max-width:220px;flex:1;">
+        <select class="fs" id="filter-role" onchange="filterUsers()" style="max-width:140px;flex:1;">
+          <option value="">Tous les rôles</option>
+          <option value="etudiant">Étudiant</option>
+          <option value="professeur">Professeur</option>
+          <option value="admin">Admin</option>
+        </select>
+        <select class="fs" id="filter-status" onchange="filterUsers()" style="max-width:150px;flex:1;">
+          <option value="">Tous statuts</option>
+          <option value="actif">Actif</option>
+          <option value="en_attente">En attente</option>
+          <option value="inactif">Inactif</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Utilisateur</th><th>Rôle</th><th class="hide-mobile">Email</th><th class="hide-mobile">Créé le</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="users-body"><tr><td colspan="6" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉTUDIANTS -->
+    <div class="page" id="page-etudiants">
+      <div class="ph"><div><h2 class="pt">Étudiants</h2><p class="psub">Liste des étudiants inscrits</p></div></div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th class="hide-mobile">Matricule</th><th>Étudiant</th><th>Niveau</th><th class="hide-mobile">Email</th><th>Taux</th><th>Statut</th></tr></thead>
+            <tbody id="etudiants-body"><tr><td colspan="6" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFESSEURS -->
+    <div class="page" id="page-profs">
+      <div class="ph"><div><h2 class="pt">Professeurs</h2><p class="psub">Corps enseignant</p></div></div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Professeur</th><th class="hide-mobile">Email</th><th>Grade</th><th class="hide-mobile">Modules</th><th>Statut</th></tr></thead>
+            <tbody id="profs-body"><tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULES -->
+    <div class="page" id="page-modules">
+      <div class="ph">
+        <div><h2 class="pt">Modules</h2><p class="psub">Gestion des modules pédagogiques</p></div>
+        <button class="btn bp" onclick="om('m-module')"><i class="fas fa-plus"></i> Nouveau module</button>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Code</th><th>Intitulé</th><th class="hide-mobile">Niveau</th><th class="hide-mobile">Semestre</th><th class="hide-mobile">Professeur</th><th>Types</th><th class="hide-mobile">Coeff.</th><th>Actions</th></tr></thead>
+            <tbody id="modules-body"><tr><td colspan="8" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEMESTRES -->
+    <div class="page" id="page-semestres">
+      <div class="ph"><div><h2 class="pt">Semestres</h2><p class="psub">Années universitaires et semestres</p></div></div>
+      <div id="semestres-list"><div class="loading"><i class="fas fa-spinner fa-spin"></i>Chargement...</div></div>
+    </div>
+
+    <!-- JUSTIFICATIONS -->
+    <div class="page" id="page-justifications">
+      <div class="ph"><div><h2 class="pt">Justifications</h2><p class="psub">Toutes les demandes</p></div></div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Étudiant</th><th class="hide-mobile">Module</th><th class="hide-mobile">Date séance</th><th>Motif</th><th>Statut</th></tr></thead>
+            <tbody id="justif-body"><tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Chargement...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="act" id="mnav-dashboard" onclick="sp('dashboard',this);mnavAct(this)"><i class="fas fa-chart-pie"></i>Dashboard</button>
+  <button id="mnav-pending" onclick="sp('pending',this);mnavAct(this)"><i class="fas fa-user-clock"></i>Attente</button>
+  <button id="mnav-users" onclick="sp('users',this);mnavAct(this)"><i class="fas fa-users"></i>Utilisateurs</button>
+  <button id="mnav-modules" onclick="sp('modules',this);mnavAct(this)"><i class="fas fa-book"></i>Modules</button>
+  <button id="mnav-justifications" onclick="sp('justifications',this);mnavAct(this)"><i class="fas fa-file-alt"></i>Justifs</button>
+</nav>
+
+<!-- MODAL: Ajouter utilisateur -->
+<div class="modal fade" id="m-user" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fas fa-users-cog me-2" style="color:var(--p);"></i>Ajouter Utilisateur</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="user-modal-msg"></div>
+        <div class="row g-3">
+          <div class="col-6"><label class="fl">Nom</label><input class="fc" id="u-nom" placeholder="Nom"></div>
+          <div class="col-6"><label class="fl">Prénom</label><input class="fc" id="u-prenom" placeholder="Prénom"></div>
+          <div class="col-12"><label class="fl">Rôle</label><select class="fs" id="u-role"><option value="etudiant">Étudiant</option><option value="professeur">Professeur</option><option value="admin">Admin</option></select></div>
+          <div class="col-12"><label class="fl">Email</label><input class="fc" type="email" id="u-email" placeholder="email@univ.dz"></div>
+          <div class="col-12"><label class="fl">Mot de passe temporaire</label><input class="fc" type="password" id="u-pass" placeholder="••••••••"></div>
+          <div class="col-6"><label class="fl">Matricule</label><input class="fc" id="u-matricule" placeholder="2022001"></div>
+          <div class="col-6"><label class="fl">Niveau</label><select class="fs" id="u-niveau"><option value="1">L1</option><option value="2">L2</option><option value="3" selected>L3</option><option value="4">M1</option><option value="5">M2</option></select></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn bo" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn bp" onclick="addUser()"><i class="fas fa-save"></i> Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Nouveau module -->
+<div class="modal fade" id="m-module" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fas fa-book me-2" style="color:var(--p);"></i>Nouveau Module</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="module-modal-msg"></div>
+        <div class="row g-3">
+          <div class="col-4"><label class="fl">Code</label><input class="fc" id="m-code" placeholder="ALGO3"></div>
+          <div class="col-8"><label class="fl">Intitulé</label><input class="fc" id="m-intitule" placeholder="Algorithmique..."></div>
+          <div class="col-6"><label class="fl">Niveau</label><select class="fs" id="m-niveau" onchange="loadSemestresForNiveau()"><option value="1">L1</option><option value="2">L2</option><option value="3" selected>L3</option><option value="4">M1</option><option value="5">M2</option></select></div>
+          <div class="col-6"><label class="fl">Semestre</label><select class="fs" id="m-semestre"><option value="">-- Choisir --</option></select></div>
+          <div class="col-12"><label class="fl">Professeur</label><select class="fs" id="m-prof"><option value="">-- Aucun --</option></select></div>
+          <div class="col-4"><label class="fl">TD ?</label><select class="fs" id="m-td"><option value="1">Oui</option><option value="0">Non</option></select></div>
+          <div class="col-4"><label class="fl">TP ?</label><select class="fs" id="m-tp"><option value="0">Non</option><option value="1">Oui</option></select></div>
+          <div class="col-4"><label class="fl">Coeff.</label><input class="fc" type="number" id="m-coeff" value="2" min="1" max="10"></div>
+          <div class="col-6"><label class="fl">Crédits ECTS</label><input class="fc" type="number" id="m-credits" value="3" min="1" max="30"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn bo" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn bp" onclick="addModule()"><i class="fas fa-save"></i> Créer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Approuver utilisateur -->
+<div class="modal fade" id="m-approve" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fas fa-user-check me-2" style="color:#34d399;"></i>Approuver le compte</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <p style="color:var(--ts);font-size:.85rem;margin-bottom:1rem;">Approuver <strong style="color:var(--t);" id="approve-name"></strong> ?</p>
+        <div id="approve-groups-section" style="display:none;">
+          <label style="color:var(--ts);font-size:.8rem;font-weight:600;margin-bottom:.5rem;display:block;"><i class="fas fa-users me-1" style="color:var(--p);"></i>Assigner des groupes :</label>
+          <p style="font-size:.75rem;color:var(--tm);margin-bottom:.7rem;">Modifiable plus tard.</p>
+          <div id="approve-groups-list" style="max-height:260px;overflow-y:auto;padding-right:4px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn bo" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn bsuc" onclick="confirmApprove()"><i class="fas fa-check"></i> Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/api.js"></script>
+<script>
+  const user = API.requireAuth('admin');
+  if (!user) throw new Error('Not authenticated');
+
+  document.getElementById('user-info').textContent = `${user.prenom} ${user.nom}`;
+  document.getElementById('user-avatar').textContent = ((user.nom?.[0]||'')+(user.prenom?.[0]||'')).toUpperCase();
+
+  let allUsers = [];
+
+  // ── SIDEBAR TOGGLE ────────────────────────────────────────────
+  function toggleSidebar() {
+    const sb  = document.getElementById('sidebar');
+    const ov  = document.getElementById('sidebar-overlay');
+    const open = sb.classList.contains('open');
+    sb.classList.toggle('open', !open);
+    ov.classList.toggle('show', !open);
+  }
+
+  function mnavAct(el) {
+    document.querySelectorAll('.mobile-nav button').forEach(b => b.classList.remove('act'));
+    el.classList.add('act');
+  }
+
+  // ── PAGE SWITCHING ────────────────────────────────────────────
+  function sp(id, el) {
+    if (window.innerWidth < 768) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('show');
+    }
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('act'));
+    document.querySelectorAll('.sl').forEach(l => l.classList.remove('act'));
+    document.getElementById('page-'+id).classList.add('act');
+    if (el?.classList?.contains('sl')) el.classList.add('act');
+    const titles={dashboard:'Tableau de bord',pending:'Approbations',users:'Utilisateurs',etudiants:'Étudiants',profs:'Professeurs',modules:'Modules',semestres:'Semestres',justifications:'Justifications'};
+    document.getElementById('topbar-title').textContent = titles[id]||'';
+    if (id==='pending')        loadPending();
+    if (id==='users')          loadUsers();
+    if (id==='etudiants')      loadEtudiants();
+    if (id==='profs')          loadProfs();
+    if (id==='modules')        loadModules();
+    if (id==='semestres')      loadSemestres();
+    if (id==='justifications') loadJustifications();
+  }
+
+  function om(id) {
+    new bootstrap.Modal(document.getElementById(id)).show();
+    if (id==='m-module') loadSemestresForNiveau();
+  }
+
+  // ── PENDING ───────────────────────────────────────────────────
+  let _pendingData=[], _allGroupes=[];
+
+  async function loadPending() {
+    try {
+      const [pending, groupes] = await Promise.all([API.get('/admin/users/pending'), API.get('/admin/groupes')]);
+      _pendingData = pending; _allGroupes = groupes;
+      const badge = document.getElementById('pending-badge');
+      if (pending.length>0){badge.textContent=pending.length;badge.style.display='inline';}else{badge.style.display='none';}
+      document.getElementById('pending-body').innerHTML = pending.length
+        ? pending.map(u=>`<tr>
+            <td style="font-weight:600;color:var(--t);">${u.nom} ${u.prenom}</td>
+            <td class="hide-mobile" style="font-size:.78rem;color:var(--ts);">${u.email}</td>
+            <td><span class="badge ${u.role==='etudiant'?'bi':'bp2'}">${u.role}</span></td>
+            <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn bsuc bsm me-1" onclick="openApprove(${u.id},'${u.role}','${u.nom} ${u.prenom}')"><i class="fas fa-check"></i></button>
+              <button class="btn bd bsm" onclick="rejectUser(${u.id},'${u.nom} ${u.prenom}')"><i class="fas fa-times"></i></button>
+            </td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" class="text-center py-5" style="color:var(--tm);">✅ Aucun compte en attente</td></tr>';
+    } catch(e){console.error(e);}
+  }
+
+  let _approveUserId=null, _approveRole=null;
+
+  function openApprove(userId, role, name) {
+    _approveUserId=userId; _approveRole=role;
+    document.getElementById('approve-name').textContent=name;
+    const gs=document.getElementById('approve-groups-section');
+    if (role==='etudiant') {
+      gs.style.display='block';
+      document.getElementById('approve-groups-list').innerHTML = _allGroupes.map(g=>`
+        <label style="display:flex;align-items:center;gap:8px;padding:.4rem .6rem;background:var(--elevated);border-radius:8px;border:1px solid var(--border);cursor:pointer;margin-bottom:.4rem;">
+          <input type="checkbox" value="${g.id}" style="accent-color:var(--p);width:14px;height:14px;">
+          <span style="font-size:.82rem;color:var(--t);">${g.nom}</span>
+          <span class="badge bi" style="font-size:.68rem;">${g.type}</span>
+          <span style="font-size:.72rem;color:var(--tm);margin-left:auto;">${g.niveau} — ${g.nb_etudiants} étud.</span>
+        </label>`).join('');
+    } else { gs.style.display='none'; }
+    new bootstrap.Modal(document.getElementById('m-approve')).show();
+  }
+
+  async function confirmApprove() {
+    const boxes=document.querySelectorAll('#approve-groups-list input[type=checkbox]:checked');
+    const groupe_ids=Array.from(boxes).map(cb=>parseInt(cb.value));
+    try {
+      await API.post(`/admin/users/${_approveUserId}/approve`,{groupe_ids});
+      bootstrap.Modal.getInstance(document.getElementById('m-approve')).hide();
+      loadPending(); showToast('Utilisateur approuvé !','success');
+    } catch(e){alert(e.message);}
+  }
+
+  async function rejectUser(id,name) {
+    if (!confirm(`Refuser le compte de "${name}" ?`)) return;
+    try { await API.post(`/admin/users/${id}/reject`,{}); loadPending(); showToast('Compte refusé.','warning'); }
+    catch(e){alert(e.message);}
+  }
+
+  function showToast(msg,type='info') {
+    const colors={success:'#34d399',warning:'#f59e0b',info:'#8b5cf6',danger:'#f87171'};
+    const t=document.createElement('div');
+    t.style.cssText=`position:fixed;bottom:80px;right:16px;background:var(--card);border:1px solid ${colors[type]};color:var(--t);padding:12px 20px;border-radius:10px;font-size:.82rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);`;
+    t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3500);
+  }
+
+  let allSemestres=[];
+
+  async function loadSemestresForNiveau() {
+    const niveauId=document.getElementById('m-niveau').value;
+    try {
+      if (!allSemestres.length) allSemestres=await API.get('/admin/semestres');
+      const filtered=allSemestres.filter(s=>parseInt(s.niveau_id)===parseInt(niveauId));
+      const sel=document.getElementById('m-semestre');
+      sel.innerHTML=filtered.length?filtered.map(s=>`<option value="${s.id}">${s.libelle}</option>`).join(''):'<option value="">-- Aucun semestre --</option>';
+    } catch(e){}
+  }
+
+  // ── DASHBOARD ─────────────────────────────────────────────────
+  async function loadDashboard() {
+    try {
+      const data=await API.get('/admin/dashboard');
+      const t=data.totals;
+      document.getElementById('dash-stats').innerHTML=`
+        <div class="sc"><div class="sl2">Étudiants</div><div class="sv">${t.total_etudiants||0}</div><i class="fas fa-user-graduate si"></i></div>
+        <div class="sc"><div class="sl2">Professeurs</div><div class="sv">${t.total_profs||0}</div><i class="fas fa-chalkboard-teacher si"></i></div>
+        <div class="sc"><div class="sl2">Séances</div><div class="sv">${t.total_seances||0}</div><i class="fas fa-calendar si"></i></div>
+        <div class="sc"><div class="sl2">Présences</div><div class="sv">${t.total_presences||0}</div><i class="fas fa-check si"></i></div>
+        <div class="sc"><div class="sl2">Taux global</div><div class="sv" style="color:var(--ok);">${t.taux_global||0}<span style="font-size:.9rem;color:var(--tm)">%</span></div><i class="fas fa-chart-line si"></i></div>
+        <div class="sc"><div class="sl2">Justif. attente</div><div class="sv" style="color:var(--warn);">${t.justif_attente||0}</div><i class="fas fa-file-alt si" style="color:var(--warn);"></i></div>`;
+
+      document.getElementById('modules-stats-body').innerHTML=data.modules_stats?.length
+        ?data.modules_stats.map(m=>{const taux=m.taux||0,c=taux>=85?'var(--ok)':taux>=75?'var(--warn)':'var(--err)';return`<tr><td style="color:var(--t);">${m.intitule} <code style="font-size:.7rem;">${m.code}</code></td><td class="hide-mobile" style="color:var(--tm);">${m.nb_seances}</td><td><span style="color:${c};font-weight:600;">${taux}%</span></td></tr>`;}).join('')
+        :'<tr><td colspan="3" class="text-center py-3" style="color:var(--tm);">Aucune donnée</td></tr>';
+
+      document.getElementById('recent-users').innerHTML=data.recent_users?.slice(0,6).map(u=>{
+        const ini=((u.nom?.[0]||'')+(u.prenom?.[0]||'')).toUpperCase();
+        const rc=u.role==='admin'?'#8b5cf6':u.role==='professeur'?'#38bdf8':'#34d399';
+        return`<div style="padding:.65rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;">
+          <div class="av" style="background:${rc};">${ini}</div>
+          <div style="flex:1;min-width:0;"><div style="font-size:.8rem;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.prenom} ${u.nom}</div>
+          <div style="font-size:.7rem;color:var(--tm);">${u.role} · ${fmtDate(u.created_at)}</div></div>
+          <span class="badge ${u.status==='actif'?'ba':u.status==='en_attente'?'bw':'ber'}">${u.status}</span>
+        </div>`;}).join('')||'<div style="padding:1.5rem;text-align:center;color:var(--tm);">Aucun utilisateur</div>';
+    } catch(e){console.error(e);}
+  }
+
+  // ── USERS ─────────────────────────────────────────────────────
+  async function loadUsers() {
+    try { allUsers=await API.get('/admin/users'); renderUsers(allUsers); }
+    catch(e){console.error(e);}
+  }
+
+  function renderUsers(data) {
+    document.getElementById('users-body').innerHTML=data.length
+      ?data.map(u=>{
+        const ini=((u.nom?.[0]||'')+(u.prenom?.[0]||'')).toUpperCase();
+        const rc=u.role==='admin'?'#8b5cf6':u.role==='professeur'?'#38bdf8':'#34d399';
+        const rc2=u.role==='admin'?'ur-admin':u.role==='professeur'?'ur-prof':'ur-stud';
+        return`<tr>
+          <td><div style="display:flex;align-items:center;gap:9px;"><div class="av" style="background:${rc};">${ini}</div><span style="color:var(--t);">${u.prenom} ${u.nom}</span></div></td>
+          <td><span class="${rc2}">${u.role}</span></td>
+          <td class="hide-mobile" style="font-size:.78rem;color:var(--tm);">${u.email}</td>
+          <td class="hide-mobile" style="font-size:.77rem;color:var(--tm);">${fmtDate(u.created_at)}</td>
+          <td><span class="badge ${u.status==='actif'?'ba':u.status==='en_attente'?'bw':'ber'}">${u.status}</span></td>
+          <td style="white-space:nowrap;">
+            ${u.status==='en_attente'?`<button class="btn bsuc bsm me-1" onclick="changeStatus(${u.id},'actif')"><i class="fas fa-check"></i></button>`:''}
+            <button class="btn bd bsm" onclick="deleteUser(${u.id},'${u.prenom} ${u.nom}')"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`;}).join('')
+      :'<tr><td colspan="6" class="text-center py-4" style="color:var(--tm);">Aucun utilisateur</td></tr>';
+  }
+
+  function filterUsers() {
+    const search=document.getElementById('search-user').value.toLowerCase();
+    const role=document.getElementById('filter-role').value;
+    const status=document.getElementById('filter-status').value;
+    renderUsers(allUsers.filter(u=>(!search||(u.nom+' '+u.prenom+' '+u.email).toLowerCase().includes(search))&&(!role||u.role===role)&&(!status||u.status===status)));
+  }
+
+  async function changeStatus(id,status){try{await API.put(`/admin/users/${id}/status`,{status});loadUsers();}catch(e){alert(e.message);}}
+  async function deleteUser(id,name){if(!confirm(`Supprimer "${name}" ?`))return;try{await API.delete(`/admin/users/${id}`);loadUsers();}catch(e){alert(e.message);}}
+
+  async function addUser() {
+    const msg=document.getElementById('user-modal-msg');
+    const body={nom:document.getElementById('u-nom').value.trim(),prenom:document.getElementById('u-prenom').value.trim(),email:document.getElementById('u-email').value.trim(),password:document.getElementById('u-pass').value,role:document.getElementById('u-role').value,matricule:document.getElementById('u-matricule').value.trim(),niveau_id:document.getElementById('u-niveau').value};
+    if(!body.nom||!body.prenom||!body.email||!body.password){msg.innerHTML='<div class="alert alert-danger mb-2">Champs obligatoires manquants.</div>';return;}
+    try{await API.post('/admin/users',body);bootstrap.Modal.getInstance(document.getElementById('m-user')).hide();loadUsers();}
+    catch(e){msg.innerHTML=`<div class="alert alert-danger mb-2">${e.message}</div>`;}
+  }
+
+  // ── ÉTUDIANTS ─────────────────────────────────────────────────
+  async function loadEtudiants() {
+    try {
+      const data=await API.get('/admin/etudiants');
+      document.getElementById('etudiants-body').innerHTML=data.length
+        ?data.map(e=>`<tr>
+          <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);font-family:monospace;">${e.matricule}</td>
+          <td style="color:var(--t);">${e.prenom} ${e.nom}</td>
+          <td><span class="badge bp2">${e.niveau}</span></td>
+          <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${e.email}</td>
+          <td style="color:${(e.taux_presence||0)>=75?'var(--ok)':'var(--warn)'};">${e.taux_presence||0}%</td>
+          <td><span class="badge ${e.status==='actif'?'ba':'ber'}">${e.status}</span></td>
+        </tr>`).join('')
+        :'<tr><td colspan="6" class="text-center py-4" style="color:var(--tm);">Aucun étudiant</td></tr>';
+    } catch(e){console.error(e);}
+  }
+
+  // ── PROFESSEURS ───────────────────────────────────────────────
+  async function loadProfs() {
+    try {
+      const data=await API.get('/admin/professeurs');
+      document.getElementById('profs-body').innerHTML=data.length
+        ?data.map(p=>`<tr>
+          <td style="color:var(--t);">${p.prenom} ${p.nom}</td>
+          <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${p.email}</td>
+          <td><span class="badge bi">${p.grade}</span></td>
+          <td class="hide-mobile">${p.nb_modules} modules</td>
+          <td><span class="badge ${p.status==='actif'?'ba':'ber'}">${p.status}</span></td>
+        </tr>`).join('')
+        :'<tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Aucun professeur</td></tr>';
+    } catch(e){console.error(e);}
+  }
+
+  // ── MODULES ───────────────────────────────────────────────────
+  async function loadModules() {
+    try {
+      const [modules,profs]=await Promise.all([API.get('/admin/modules'),API.get('/admin/professeurs')]);
+      document.getElementById('m-prof').innerHTML='<option value="">-- Aucun --</option>'+profs.map(p=>`<option value="${p.id}">${p.prenom} ${p.nom}</option>`).join('');
+      document.getElementById('modules-body').innerHTML=modules.length
+        ?modules.map(m=>`<tr>
+          <td><code style="color:var(--pl);">${m.code}</code></td>
+          <td style="color:var(--t);">${m.intitule}</td>
+          <td class="hide-mobile"><span class="badge bp2">${m.niveau}</span></td>
+          <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${m.semestre}</td>
+          <td class="hide-mobile" style="font-size:.78rem;color:var(--ts);">${m.professeur_nom||'—'}</td>
+          <td>${m.has_td?'<span class="badge bi">TD</span> ':''}${m.has_tp?'<span class="badge bw">TP</span>':''}</td>
+          <td class="hide-mobile"><span class="badge bp2">${m.coefficient}</span></td>
+          <td><button class="btn bd bsm" onclick="deleteModule(${m.id},'${m.intitule}')"><i class="fas fa-trash"></i></button></td>
+        </tr>`).join('')
+        :'<tr><td colspan="8" class="text-center py-4" style="color:var(--tm);">Aucun module</td></tr>';
+    } catch(e){console.error(e);}
+  }
+
+  async function addModule() {
+    const msg=document.getElementById('module-modal-msg');
+    const body={code:document.getElementById('m-code').value.trim(),intitule:document.getElementById('m-intitule').value.trim(),niveau_id:document.getElementById('m-niveau').value,semestre_id:document.getElementById('m-semestre').value,professeur_id:document.getElementById('m-prof').value||null,has_td:document.getElementById('m-td').value==='1',has_tp:document.getElementById('m-tp').value==='1',coefficient:document.getElementById('m-coeff').value,credits:document.getElementById('m-credits').value||3};
+    if(!body.code||!body.intitule){msg.innerHTML='<div class="alert alert-danger mb-2">Code et intitulé requis.</div>';return;}
+    try{await API.post('/admin/modules',body);bootstrap.Modal.getInstance(document.getElementById('m-module')).hide();loadModules();}
+    catch(e){msg.innerHTML=`<div class="alert alert-danger mb-2">${e.message}</div>`;}
+  }
+
+  async function deleteModule(id,name){if(!confirm(`Supprimer "${name}" ?`))return;try{await API.delete(`/admin/modules/${id}`);loadModules();}catch(e){alert(e.message);}}
+
+  // ── SEMESTRES ─────────────────────────────────────────────────
+  async function loadSemestres() {
+    try {
+      const data=await API.get('/admin/semestres');
+      document.getElementById('semestres-list').innerHTML=`
+        <div class="card"><div class="table-responsive"><table class="table mb-0">
+          <thead><tr><th>Libellé</th><th class="hide-mobile">Niveau</th><th class="hide-mobile">Année</th><th>Début</th><th class="hide-mobile">Fin</th><th>Statut</th></tr></thead>
+          <tbody>${data.length?data.map(s=>`<tr>
+            <td style="color:var(--t);font-weight:500;">${s.libelle}</td>
+            <td class="hide-mobile"><span class="badge bp2">${s.niveau}</span></td>
+            <td class="hide-mobile" style="color:var(--tm);">${s.annee}</td>
+            <td style="color:var(--tm);font-size:.76rem;">${fmtDate(s.date_debut)}</td>
+            <td class="hide-mobile" style="color:var(--tm);font-size:.76rem;">${fmtDate(s.date_fin)}</td>
+            <td><span class="badge ${s.actif?'ba':'bm'}">${s.actif?'En cours':'Terminé'}</span></td>
+          </tr>`).join(''):'<tr><td colspan="6" class="text-center py-4" style="color:var(--tm);">Aucun semestre</td></tr>'}</tbody>
+        </table></div></div>`;
+    } catch(e){console.error(e);}
+  }
+
+  // ── JUSTIFICATIONS ────────────────────────────────────────────
+  async function loadJustifications() {
+    try {
+      const data=await API.get('/admin/justifications');
+      const badges={acceptee:'ba',en_attente:'bw',refusee:'ber'};
+      const labels={acceptee:'Acceptée',en_attente:'En attente',refusee:'Refusée'};
+      document.getElementById('justif-body').innerHTML=data.length
+        ?data.map(j=>`<tr>
+          <td style="color:var(--t);">${j.etudiant_nom}</td>
+          <td class="hide-mobile" style="font-size:.78rem;color:var(--ts);">${j.module}</td>
+          <td class="hide-mobile" style="font-size:.76rem;color:var(--tm);">${fmtDate(j.date_seance)}</td>
+          <td style="font-size:.78rem;">${j.motif}</td>
+          <td><span class="badge ${badges[j.statut]}">${labels[j.statut]}</span></td>
+        </tr>`).join('')
+        :'<tr><td colspan="5" class="text-center py-4" style="color:var(--tm);">Aucune justification</td></tr>';
+    } catch(e){console.error(e);}
+  }
+
+  function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+
+  // ── BOOT ──────────────────────────────────────────────────────
+  loadDashboard();
+  API.get('/admin/users/pending').then(p=>{
+    const badge=document.getElementById('pending-badge');
+    if(p&&p.length>0){badge.textContent=p.length;badge.style.display='inline';}
+  }).catch(()=>{});
+</script>
+</body>
+</html>
